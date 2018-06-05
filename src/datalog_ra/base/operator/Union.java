@@ -36,9 +36,9 @@ public class Union implements Operator{
                 
                 o1.reset();
                 //duplicate check calls nonDistinctNext()
-                Tuple t1 = o1.nonDistinctNext(); 
+                Tuple t1 = o1.nonDistinctNext();
                 boolean distinct = true;
-                
+
                     while(t1 != null) {                     
                         if (t1.subsumed(t2)) { //found duplicate
                             distinct = false;
@@ -47,8 +47,9 @@ public class Union implements Operator{
                         //duplicate check calls nonDistinctNext()
                         t1 = o1.nonDistinctNext(); 
                     }
-                if (distinct) //did not find duplicate
+                if (distinct) {//did not find duplicate
                     return t2;
+                }
             }
             else {
                 Tuple t = o1.next();

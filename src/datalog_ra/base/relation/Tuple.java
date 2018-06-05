@@ -15,12 +15,36 @@ public class Tuple implements Iterable<Attribute>{
     }
     
     public boolean subsumed(Tuple tuple){
+        if (tuple == null) 
+            return false;
         if (this.size() != tuple.size())
             return false;
         Iterator<Attribute> it = tuple.iterator();
         for (Attribute a : attributes) {
             //attributes differ
-            if (!(it.next().equals(a))) return false;
+            if (!(it.next().compareTo(a))) return false;
+        }
+        return true;
+    }
+    
+    /**
+     *
+     * @param tuple
+     * @return
+     */
+    public boolean compareTo(Tuple tuple){
+        if (tuple == null) {
+            return false;
+        }
+        if (this.size() != tuple.size()) {
+            return false;
+        }
+        Iterator<Attribute> it = tuple.iterator();
+        for (Attribute a : attributes) {
+            //attributes differ
+            if (!(it.next().compareTo(a))) {
+                return false;
+            }
         }
         return true;
     }
@@ -28,10 +52,11 @@ public class Tuple implements Iterable<Attribute>{
     @Override
     public String toString(){
         String result = "";
-        for (Attribute attribute : attributes){
-            result += attribute.getValue() + " | ";
+        for (Iterator it = attributes.iterator(); it.hasNext();) {
+            result += it.next().toString();
+            if (it.hasNext())
+                result += "|";
         }
-        result += "\n";
         return result;
     }
     
@@ -46,6 +71,14 @@ public class Tuple implements Iterable<Attribute>{
     
     public Attribute get(int index){
         return attributes.get(index);
+    }
+    
+    public Tuple copy(){
+        Tuple result = new Tuple();
+        for (Attribute a : attributes) {
+            result.add(a.copy());
+        }
+        return result;
     }
     
     /** Iterator of internal Attribute List with restricted access to funcionality.  

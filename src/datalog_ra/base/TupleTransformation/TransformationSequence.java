@@ -11,14 +11,16 @@ import java.util.List;
 public class TransformationSequence implements TupleTransformation{
     private final List<TupleTransformation> transformation;
     
-    public TransformationSequence(TupleTransformation transformation1, TupleTransformation  transformation2){
+    public TransformationSequence(){
         transformation = new LinkedList();
-        transformation.add(transformation1);
-        transformation.add(transformation2);
     }
     
     public TransformationSequence(List<TupleTransformation> transformation){
-        this.transformation = transformation;
+        this.transformation = new LinkedList(transformation);
+    }
+    
+    public void add(TupleTransformation transformation) {
+        this.transformation.add(transformation);
     }
             
     @Override
@@ -26,8 +28,9 @@ public class TransformationSequence implements TupleTransformation{
         Tuple result = tuple;
         for (TupleTransformation tupleTrans : transformation) {
                 result = tupleTrans.transform(result);
-                if (result == null) 
+                if (result == null) {
                     break; 
+                }
             }
         return result;
     }

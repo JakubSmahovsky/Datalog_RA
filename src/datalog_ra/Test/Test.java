@@ -1,0 +1,22 @@
+package datalog_ra.Test;
+
+import datalog_ra.base.database.Database;
+import datalog_ra.evaluation.Query;
+
+/**
+ *
+ * @author Jakub
+ */
+public abstract class Test {   
+    public static Query test(String s, Database db) {
+        switch (s) {
+            case "winmove" :
+                return new winmove(db);
+            case "wellf" :
+                return new wellf(db);
+            case "fero" : 
+                return new fero(db);
+        }
+        return null;
+    }
+}

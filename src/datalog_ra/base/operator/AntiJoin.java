@@ -92,7 +92,6 @@ public class AntiJoin implements Operator{
     public void reset() {
         o1.reset();
         o2.reset();
-        tuple1 = o1.next();
     }
 
     @Override

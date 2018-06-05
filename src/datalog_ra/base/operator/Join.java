@@ -25,7 +25,7 @@ public class Join implements Operator{
      * in tuple transformation, returns merged tiles on transform() = true.
      * Does not return the result of transform()! 
      * Generates duplicates from o1,o2
-    */
+     */
     @Override
     public Tuple nonDistinctNext() {
         //function takes tuples from o2, merges them with t1 from o1 and
@@ -48,8 +48,8 @@ public class Join implements Operator{
         return null;
     }
     
-    /* Function next() returns the next tuple that fills the requirements set
-     * in tuple transformation, returns merged tiles on transform() = true.
+    /** Function next() returns the next tuple that fills the requirements set
+     * in tuple transformation, returns merged tuples when transform() = true.
      * Does not return the result of transform()!
     */
     @Override

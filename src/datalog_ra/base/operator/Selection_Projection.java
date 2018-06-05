@@ -36,8 +36,9 @@ public class Selection_Projection implements Operator{
                         break;
                     }
                 }
-            if (distinct) 
+            if (distinct) {
                 return current;
+            }
             current = this.nonDistinctNext();
         }
         return null;
