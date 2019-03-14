@@ -1,4 +1,4 @@
-package datalog_ra.base.database;
+package datalog_ra.base.instance;
 
 import datalog_ra.base.operator.Union;
 import datalog_ra.base.relation.Relation;
@@ -15,10 +15,10 @@ import java.util.logging.Logger;
  *
  * @author Jakub
  */
-public class Database {
+public class Instance {
     private HashMap<String,Relation> relations = new HashMap(); 
     
-    public Database(){
+    public Instance(){
     }
     
     public boolean init(File directory){
@@ -37,7 +37,7 @@ public class Database {
                     String relation_name = f.getName().substring(0, f.getName().lastIndexOf('.'));
                     relations.put(relation_name,Initialization.loadRelation(f));
                 } catch (IOException ex) {
-                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Instance.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             return true;
@@ -60,10 +60,10 @@ public class Database {
                 fw.close();
             }
             catch (IOException ex) {
-                Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Instance.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("Database successfully saved to " 
+        System.out.println("Instance successfully saved to " 
                 + directory.getPath() + ".");
         return true;
     }
@@ -105,7 +105,7 @@ public class Database {
     
     /**
      * Extends the relation called name by provided relation. Or adds a new
-     * relation called name to the database if it did not exist before.
+     * relation called name to the instance if it did not exist before.
      * @return true if an existing relation was changed and false if new one was 
      * added
      */
@@ -121,12 +121,12 @@ public class Database {
         return true;
     }
     
-    public boolean updateFrom(Database database) {
+    public boolean updateFrom(Instance source) {
         for (String relation : relations.keySet()) {
-            Relation newRelation = database.get(relation);
+            Relation newRelation = source.get(relation);
             if (newRelation == null) {
                 System.out.println("Unable to update relation " + relation 
-                        + ". Not present in the new database.");
+                        + ". Not present in the new instance.");
                 return false;
             }
             replace(relation, newRelation);
@@ -134,26 +134,26 @@ public class Database {
         return true;
     }
     
-    public Database copy(){
-        Database result = new Database();
+    public Instance copy(){
+        Instance result = new Instance();
         for (String relation : relations.keySet()) {
             result.add(relation, relations.get(relation).copy());
         }
         return result;
     }
     
-    public boolean compareTo(Database anotherDatabase){
-        if (relations.keySet().size() != anotherDatabase.getNames().size()) {
+    public boolean compareTo(Instance anotherInstance){
+        if (relations.keySet().size() != anotherInstance.getNames().size()) {
             return false;
         }
         
         for (String relation : relations.keySet()) {
-            if (anotherDatabase.get(relation) == null)
+            if (anotherInstance.get(relation) == null)
                 return false;
         }
         
         for (String relation : relations.keySet()) {
-            if (!relations.get(relation).compareTo(anotherDatabase.get(relation)))
+            if (!relations.get(relation).compareTo(anotherInstance.get(relation)))
                 return false;
         }
         return true;

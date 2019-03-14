@@ -1,4 +1,4 @@
-package datalog_ra.base.database;
+package datalog_ra.base.instance;
 import datalog_ra.base.relation.Attribute;
 import datalog_ra.base.relation.Relation;
 import datalog_ra.base.relation.Tuple;

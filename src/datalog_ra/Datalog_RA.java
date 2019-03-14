@@ -1,7 +1,7 @@
 package datalog_ra;
 
 import datalog_ra.Test.Test;
-import datalog_ra.base.database.Database;
+import datalog_ra.base.instance.Instance;
 import java.io.IOException;
 import java.util.Scanner;
 import java.io.File;
@@ -19,7 +19,7 @@ public class Datalog_RA {
     public static void main(String[] args) throws IOException {
         
         Scanner cin = new Scanner(System.in);
-        Database EDB = new Database();        
+        Instance EDB = new Instance();        
         while (true) {
             if (cin.hasNext()){
                 String input = cin.nextLine();
@@ -39,7 +39,7 @@ public class Datalog_RA {
                             EDB.init(directory);
                             System.out.println(EDB);
                             break;
-                        // save command, saves the current RDB to directory in command[1]    
+                        // save command, saves the current EDB to directory in command[1]    
                         case "save":
                             if (command.length < 2){
                                 System.out.println("Directory name is required!");
