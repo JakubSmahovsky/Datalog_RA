@@ -1,17 +1,21 @@
 package datalog_ra.base.relation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class Tuple implements Iterable<Attribute>{
-    private final ArrayList<Attribute> attributes;
+    protected final ArrayList<Attribute> attributes;
     
-    public Tuple(){
-        attributes = new ArrayList<>();
+    public Tuple(Collection<? extends Attribute> attributes){
+        this.attributes = new ArrayList<>();
+        this.attributes.addAll(attributes);
     }
-    
-    public void add(Attribute attribute){
-        attributes.add(attribute);
+        
+    public Tuple(Tuple t1, Tuple t2) {
+        attributes = new ArrayList<>();
+        attributes.addAll(t1.attributes);
+        attributes.addAll(t2.attributes);
     }
     
     public boolean subsumed(Tuple tuple){
@@ -74,14 +78,10 @@ public class Tuple implements Iterable<Attribute>{
     }
     
     public Tuple copy(){
-        Tuple result = new Tuple();
-        for (Attribute a : attributes) {
-            result.add(a.copy());
-        }
-        return result;
+        return new Tuple(attributes);
     }
     
-    /** Iterator of internal Attribute List with restricted access to funcionality.  
+    /** Iterator of internal Attribute List with restricted access to funcionality.
     */
     private class TupleIterator implements Iterator<Attribute> {
         private final Iterator<Attribute> it; 

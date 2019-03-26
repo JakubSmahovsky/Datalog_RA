@@ -3,6 +3,7 @@ package datalog_ra.base.TupleTransformation;
 import datalog_ra.base.relation.Attribute;
 import datalog_ra.base.relation.Tuple;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,16 +22,16 @@ public class ProjectionTransformation implements TupleTransformation{
     public Tuple transform(Tuple tuple) {
         if (tuple == null)
             return null; 
-        Tuple result = new Tuple();
+        LinkedList<Attribute> attribs= new LinkedList<>();
         Iterator<Boolean> index = net.iterator();
         for (Attribute a : tuple) {
             if (index.hasNext()) { 
                 if (index.next()) {
-                    result.add(a);
+                    attribs.add(a);
                 }
             }
         }
-        return result;
+        return new Tuple(attribs);
     }
     
 }

@@ -1,7 +1,6 @@
 package datalog_ra.base.operator;
 
 import datalog_ra.base.TupleTransformation.TupleTransformation;
-import datalog_ra.base.relation.Attribute;
 import datalog_ra.base.relation.Tuple;
 
 /* Join operator returns merged tuples from o1 and o2 if they meet the
@@ -34,7 +33,7 @@ public class Join implements Operator{
             Tuple tuple2 = o2.nonDistinctNext();       
 
             while (tuple2 != null) {
-                Tuple result = merge(tuple1, tuple2);
+                Tuple result = new Tuple(tuple1, tuple2);
                 if (tupleTrans.transform(result) != null) 
                     return result;
                 tuple2 = o2.nonDistinctNext(); 
@@ -60,7 +59,7 @@ public class Join implements Operator{
             Tuple tuple2 = o2.next();       
 
             while (tuple2 != null) {
-                Tuple result = merge(tuple1, tuple2);
+                Tuple result = new Tuple(tuple1, tuple2);
                 if (tupleTrans.transform(result) != null) 
                     return result;
                 tuple2 = o2.next(); 
@@ -87,18 +86,4 @@ public class Join implements Operator{
         result.reset();
         return result;
     }
-    
-    /* Private function takes two tuples and meges them into one. 
-       Attributes of the second Tuple come after the Attributes of the first.
-    */
-    private Tuple merge(Tuple tuple1, Tuple tuple2) {
-        Tuple result = new Tuple();
-            for(Attribute a : tuple1) {
-                result.add(a);
-            }
-            for(Attribute a : tuple2) {
-                result.add(a);
-            }
-        return result;
-    }    
 }

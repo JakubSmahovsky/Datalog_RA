@@ -168,4 +168,3 @@ public class Rule {
         return name;
     }
 }
-

@@ -1,7 +1,6 @@
 package datalog_ra.base.operator;
 
 import datalog_ra.base.TupleTransformation.TupleTransformation;
-import datalog_ra.base.relation.Attribute;
 import datalog_ra.base.relation.Tuple;
 
 /**
@@ -35,13 +34,15 @@ public class AntiJoin implements Operator{
         tuple1 = o1.nonDistinctNext();
         while (tuple1 != null) {
             o2.reset();
-            Tuple tuple2 = o2.nonDistinctNext();       
+            Tuple tuple2 = o2.nonDistinctNext();
 
             boolean condition = true;
             while (tuple2 != null) {
-                Tuple result = merge(tuple1, tuple2);
-                if (tupleTrans.transform(result) != null) 
+                Tuple result = new Tuple(tuple1, tuple2);
+                if (tupleTrans.transform(result) != null) {
                     condition = false;
+                    break;
+                }
                 tuple2 = o2.nonDistinctNext();
             }
 
@@ -72,7 +73,7 @@ public class AntiJoin implements Operator{
 
             boolean condition = true;
             while (tuple2 != null) {
-                Tuple result = merge(tuple1, tuple2);
+                Tuple result = new Tuple(tuple1, tuple2);
                 if (tupleTrans.transform(result) != null) 
                     condition = false;
                 tuple2 = o2.next();
@@ -99,19 +100,5 @@ public class AntiJoin implements Operator{
         AntiJoin result = new AntiJoin(o1.instance(),o2.instance(), tupleTrans);
         result.reset();
         return result;
-    }
-    
-    /* Private function takes two tuples and meges them into one. 
-       Attributes of the second Tuple come after the Attributes of the first.
-    */
-    private Tuple merge(Tuple tuple1, Tuple tuple2) {
-        Tuple result = new Tuple();
-            for(Attribute a : tuple1) {
-                result.add(a);
-            }
-            for(Attribute a : tuple2) {
-                result.add(a);
-            }
-        return result;
-    }    
+    }  
 }

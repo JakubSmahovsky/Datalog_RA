@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
 
 /**
  *
@@ -20,11 +21,11 @@ public interface Initialization {
             Tuple t;
             while ((line = reader.readLine()) != null) { // citam, kym nie je koniec riadka
                 String[] splitLine = line.split("\\|"); // rozdel riadok podla oddelovnikov
-                t = new Tuple();
-                // vloz hodnoty do objektu Row
+                LinkedList<Attribute> attribs = new LinkedList<>();
                 for (String s : splitLine) {
-                    t.add(new Attribute(s));
+                    attribs.add(new Attribute(s));
                 }
+                t = new Tuple(attribs);
                 r.add(t);
             }
             reader.close();
