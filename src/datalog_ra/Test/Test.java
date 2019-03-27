@@ -7,14 +7,15 @@ import datalog_ra.evaluation.Query;
  *
  * @author Jakub
  */
-public abstract class Test {   
-    public static Query test(String s, Instance db) {
-        switch (s) {
-            case "winmove" :
-                return new winmove(db);
-            case "wellf" :
-                return new wellf(db);
-        }
-        return null;
+public abstract class Test {
+
+  public static Query test(String s, Instance db) {
+    switch (s) {
+      case "winmove":
+        return new winmove(db);
+      case "wellf":
+        return new wellf(db);
     }
+    return null;
+  }
 }

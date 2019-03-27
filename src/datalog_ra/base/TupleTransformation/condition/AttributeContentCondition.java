@@ -6,22 +6,26 @@ import datalog_ra.base.relation.Tuple;
  *
  * @author Jakub
  */
-public class AttributeContentCondition extends Condition{
-    public AttributeContentCondition(){
-        
-    }
-    
+public class AttributeContentCondition extends Condition {
+
+  public AttributeContentCondition() {
+
+  }
+
+  @Override
+  boolean eval(Tuple tuple) {
+    return true;
+  }
+
+  private class Negated extends AttributeContentCondition {
+
     @Override
-    boolean eval(Tuple tuple) {
-        return true;
+    public Tuple transform(Tuple tuple) {
+      if (eval(tuple)) {
+        return tuple;
+      } else {
+        return null;
+      }
     }
-    
-    private class Negated extends AttributeContentCondition {
-        @Override
-        public Tuple transform(Tuple tuple) {
-        if (eval(tuple)) 
-            return tuple;
-        else return null;
-        }
-    }
+  }
 }

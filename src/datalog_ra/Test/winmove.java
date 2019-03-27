@@ -12,17 +12,17 @@ import java.util.Arrays;
  *
  * @author Jakub
  */
-public class winmove extends Query{
-    
-    public winmove(Instance source) {
-        super(source);
-        Rule answer = new Rule("answer");
-        answer.addPositiveSubgoal("move", new ArrayList()); //variables are not used yet
-        answer.addNegativeSubgoal("answer", new ArrayList()); //---------//-----------
-        answer.addAntijoinCondition(new CompareCondition(1, 2));
-        answer.setProjectionTransformation(new ProjectionTransformation(
-                Arrays.asList(0)));
-        addRule(answer);
-        System.out.println(answer().toString());
-    }
+public class winmove extends Query {
+
+  public winmove(Instance source) {
+    super(source);
+    Rule answer = new Rule("answer");
+    answer.addPositiveSubgoal("move", new ArrayList()); //variables are not used yet
+    answer.addNegativeSubgoal("answer", new ArrayList()); //---------//-----------
+    answer.addAntijoinCondition(new CompareCondition(1, 2));
+    answer.setProjectionTransformation(new ProjectionTransformation(
+        Arrays.asList(0)));
+    addRule(answer);
+    System.out.println(answer().toString());
+  }
 }

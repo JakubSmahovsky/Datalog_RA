@@ -6,12 +6,13 @@ import datalog_ra.base.relation.Tuple;
  *
  * @author Jakub
  */
-public class TrueCondition  extends Condition{
-    public TrueCondition(){
-    }
-    
-    @Override
-    boolean eval(Tuple tuple) {
-        return true;
-    }
+public class TrueCondition extends Condition {
+
+  public TrueCondition() {
+  }
+
+  @Override
+  boolean eval(Tuple tuple) {
+    return true;
+  }
 }

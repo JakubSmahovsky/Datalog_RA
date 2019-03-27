@@ -5,14 +5,16 @@ import datalog_ra.base.relation.Tuple;
 
 public abstract class Condition implements TupleTransformation {
 
-    @Override
-    public Tuple transform(Tuple tuple) {
-        if (eval(tuple)) 
-            return tuple;
-        else return null;
+  @Override
+  public Tuple transform(Tuple tuple) {
+    if (eval(tuple)) {
+      return tuple;
+    } else {
+      return null;
     }
-    
-    boolean eval(Tuple tuple) {
-        return true;
-    }
+  }
+
+  boolean eval(Tuple tuple) {
+    return true;
+  }
 }
