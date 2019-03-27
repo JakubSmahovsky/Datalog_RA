@@ -21,7 +21,7 @@ public class winmove extends Query{
         answer.addNegativeSubgoal("answer", new ArrayList()); //---------//-----------
         answer.addAntijoinCondition(new CompareCondition(1, 2));
         answer.setProjectionTransformation(new ProjectionTransformation(
-                Arrays.asList(true, false, false)));
+                Arrays.asList(0)));
         addRule(answer);
         System.out.println(answer().toString());
     }

@@ -7,30 +7,29 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * If net is shorter then Tuples in operator the missing booleans 
- * are deemed false, the remainder of Tuples will be discarded
+ * Transformation, that creates a new tuple containing attributes of 
+ * source tuple in order given by attributeOrder. 
+ * Missing attributes are discarded.
  * @author Jakub
 */
 public class ProjectionTransformation implements TupleTransformation{
-    private final List<Boolean> net;
+    private final List<Integer> attributeOrder;
     
-    public ProjectionTransformation(List<Boolean> net) {
-        this.net = net;
+    public ProjectionTransformation(List<Integer> attributeOrder) {
+        this.attributeOrder = attributeOrder;
     }
     
     @Override
     public Tuple transform(Tuple tuple) {
         if (tuple == null)
-            return null; 
-        LinkedList<Attribute> attribs= new LinkedList<>();
-        Iterator<Boolean> index = net.iterator();
-        for (Attribute a : tuple) {
-            if (index.hasNext()) { 
-                if (index.next()) {
-                    attribs.add(a);
-                }
-            }
+            return null;
+
+        LinkedList<Attribute> attribs = new LinkedList<>();
+        
+        for (Integer index : attributeOrder) {
+            attribs.add(tuple.get(index));
         }
+
         return new Tuple(attribs);
     }
     

@@ -21,7 +21,9 @@ public class wellf extends Query{
         p.addPositiveSubgoal("m", new ArrayList());
         p.addNegativeSubgoal("r", new ArrayList());
         p.addAntijoinCondition(new CompareCondition(0, 1));
-        p.setProjectionTransformation(new ProjectionTransformation(Arrays.asList(true, false)));
+        p.setProjectionTransformation(
+                new ProjectionTransformation(Arrays.asList(0))
+        );
         addRule(p);
         
         Rule r1 = new Rule("r");
