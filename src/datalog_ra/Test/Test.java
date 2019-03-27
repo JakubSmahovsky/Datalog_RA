@@ -14,8 +14,6 @@ public abstract class Test {
                 return new winmove(db);
             case "wellf" :
                 return new wellf(db);
-            case "fero" : 
-                return new fero(db);
         }
         return null;
     }
