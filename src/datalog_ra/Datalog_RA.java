@@ -2,7 +2,6 @@ package datalog_ra;
 
 import datalog_ra.Test.Test;
 import datalog_ra.base.instance.Instance;
-import java.io.IOException;
 import java.util.Scanner;
 import java.io.File;
 
@@ -17,7 +16,7 @@ public class Datalog_RA {
   public static final String ANSI_BLUE = "\u001B[34m";
   public static final String ANSI_GREEN = "\u001B[32m";
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
 
     Scanner cin = new Scanner(System.in);
     Instance EDB = new Instance();
@@ -35,8 +34,7 @@ public class Datalog_RA {
                 System.out.println("Directory name is required!");
                 break;
               }
-              File directory = new File("resources/" + command[1]);
-              EDB.init(directory);
+              EDB = new Instance(command[1]);
               System.out.println(EDB);
               break;
             // save command, saves the current EDB to directory in command[1]    

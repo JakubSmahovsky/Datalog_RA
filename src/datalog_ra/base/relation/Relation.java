@@ -24,6 +24,23 @@ public class Relation {
       t = o.next();
     }
   }
+  
+  public Relation(String relationString) {
+    tuples = new ArrayList<>();
+    String[] tuplesStrings = relationString.split(";");
+    
+    for (int i = 1; i < tuplesStrings.length; i++) {
+      String[] attributesStrings = tuplesStrings[i].split(",");
+      
+      ArrayList<Attribute> attributes = new ArrayList<>();
+      for (String attribString : attributesStrings) {
+        String attribValue = attribString.trim().replaceAll("\\(|\\)", "");
+        
+        attributes.add(new Attribute(attribValue));
+      }
+      tuples.add(new Tuple(attributes));
+    }
+  }
 
   /* If newTuple is unique in this relation adds newTuple to tuples.
      * Does not add redundant tuples!    

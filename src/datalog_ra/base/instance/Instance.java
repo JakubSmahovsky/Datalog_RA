@@ -3,8 +3,13 @@ package datalog_ra.base.instance;
 import datalog_ra.base.operator.Union;
 import datalog_ra.base.relation.Relation;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -21,26 +26,34 @@ public class Instance {
 
   public Instance() {
   }
-
-  public boolean init(File directory) {
-    if (!directory.exists()) {
-      System.out.println("Directory " + directory.getPath()
-              + " does not exist.");
-      return false;
-    } else {
-      relations = new HashMap();
-      File[] relationFiles = directory.listFiles(
-              (File dir, String name) -> name.endsWith(".txt"));
-
-      for (File f : relationFiles) {
-        try {
-          String relation_name = f.getName().substring(0, f.getName().lastIndexOf('.'));
-          relations.put(relation_name, Initialization.loadRelation(f));
-        } catch (IOException ex) {
-          Logger.getLogger(Instance.class.getName()).log(Level.SEVERE, null, ex);
-        }
+  
+  public Instance(String pathString) throws Exception {
+    Path path = Paths.get("resources\\" + pathString);
+    
+    // verify file exists
+    if (!Files.exists(path)) {
+      System.out.println("File " + pathString
+          + "does not exist within the resources directory.");
+      return;
+    }
+    
+    // load file content and split into relation strings
+    byte[] inputBytes = Files.readAllBytes(path);
+    String inputString = new String(inputBytes, Charset.defaultCharset());
+    String[] relationStrings = inputString.split("relation");
+    
+    // init and add all relations
+    relations = new HashMap();
+    for (int i = 1; i < relationStrings.length; i++) {
+      String[] relationStringParts = relationStrings[i].split(":");
+      
+      if (relationStringParts.length > 2) {
+        System.out.println("Syntax error: expected \"relation\" found \":\"");
+        return;
       }
-      return true;
+      
+      relations.put(relationStringParts[0].trim(),
+          new Relation(relationStringParts[1]));
     }
   }
 
