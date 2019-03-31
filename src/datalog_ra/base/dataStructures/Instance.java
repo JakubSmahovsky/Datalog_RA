@@ -24,7 +24,7 @@ public class Instance {
     // verify file exists
     if (!Files.exists(path)) {
       System.out.println("File " + pathString
-          + "does not exist within the resources directory.");
+          + " does not exist within the resources directory.");
       return;
     }
     

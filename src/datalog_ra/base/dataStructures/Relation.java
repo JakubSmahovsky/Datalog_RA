@@ -19,20 +19,24 @@ public class Relation {
    * Materializes Operator o. Creates a Relation out of tuples remaining in the
    * result of Operator o. Does not reset Operator o before nor after execution.
    */
-  public Relation(Operator o, String name) {
+  public Relation(Operator o, String name) {  
+    this.name = name;
     tuples = new ArrayList<>();
-    Tuple t = o.next();
     
+    Tuple t = o.next();
     if (t != null) {
       arity = t.size();
-    }     
+    }
     
     while (t != null) {
+      if (t.size() != arity) {
+        System.out.println("Error: arity mismatch at " 
+            + this.name + "\\" + arity + " adding " + t);
+      }
+      
       tuples.add(t);
       t = o.next();
     }
-    
-    this.name = name;
   }
   
   /**
@@ -43,25 +47,30 @@ public class Relation {
   public Relation(String relationString) {
     tuples = new ArrayList<>();
     
-    if (relationString.indexOf("/") == -1) {
+    // load name and Arity
+    
+    int endName = relationString.indexOf("/");
+    int endArity = relationString.indexOf(":");
+    
+    if (endName == -1) {
       System.out.println("\"Syntax error: \"/\" expected");
     }
     
-    if (relationString.indexOf(":") == -1) {
+    if (endArity == -1) {
       System.out.println("\"Syntax error: \":\" expected");
     }
     
-    name = relationString.substring(0, relationString.indexOf("/")).trim();
+    name = relationString.substring(0, endName).trim();
     arity = Integer.parseInt(
         relationString.substring(
-            relationString.indexOf("/") +1,
-            relationString.indexOf(":")
+            endName +1,
+            endArity
         ).trim()
     );
     
-    String[] tuplesStrings = relationString.split(";");
-    
-    for (int i = 1; i < tuplesStrings.length; i++) {
+    // load Tuples
+    String[] tuplesStrings = relationString.substring(endArity + 1).split(";");
+    for (int i = 0; i < tuplesStrings.length; i++) {
       String[] attributesStrings = tuplesStrings[i].split(",");
       
       ArrayList<Attribute> attributes = new ArrayList<>();
@@ -70,7 +79,7 @@ public class Relation {
         
         attributes.add(new Attribute(attribValue));
       }
-      tuples.add(new Tuple(attributes));
+      this.add(new Tuple(attributes));
     }
   }
 
@@ -81,6 +90,11 @@ public class Relation {
     for (Tuple t : tuples) {
       if (t.subsumed(newTuple)) {
         return;
+      }
+      
+      if (t.size() != arity) {
+        System.out.println("Error: arity mismatch at " 
+            + this.name + "\\" + arity + " adding " + t);
       }
     }
     tuples.add(newTuple);
