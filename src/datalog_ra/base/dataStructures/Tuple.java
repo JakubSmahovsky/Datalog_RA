@@ -1,4 +1,4 @@
-package datalog_ra.base.relation;
+package datalog_ra.base.dataStructures;
 
 import java.util.ArrayList;
 import java.util.Collection;

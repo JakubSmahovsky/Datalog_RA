@@ -2,20 +2,21 @@ package datalog_ra.evaluation;
 
 import datalog_ra.base.TupleTransformation.*;
 import datalog_ra.base.TupleTransformation.condition.*;
-import datalog_ra.base.instance.Instance;
+import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.base.operator.*;
-import datalog_ra.base.relation.Relation;
+import datalog_ra.base.dataStructures.Relation;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
  * @author Jakub
  */
 public class Rule {
-
   private final String name;
+  private final int arity;
+  
   private LinkedList<Subgoal> positiveOrder = new LinkedList<>();
   private LinkedList<Subgoal> negativeOrder = new LinkedList<>();
   private Instance positiveFactSource = new Instance();
@@ -26,8 +27,9 @@ public class Rule {
   private TupleTransformation joinCondition = new TrueCondition();
   private LinkedList<TupleTransformation> antijoinConditions = new LinkedList<>();
 
-  public Rule(String name) {
+  public Rule(String name, int arity) {
     this.name = name;
+    this.arity = arity;
   }
 
   /**
@@ -41,12 +43,18 @@ public class Rule {
    */
   public boolean updatePositiveFactSource(Instance source) {
     for (Subgoal subgoal : positiveOrder) {
-      if (source.get(subgoal.name) == null) {
+      if (source.get(
+          subgoal.name,
+          subgoal.variables.size()
+      ) == null) {
         System.out.println("Unable to update relation \"" + subgoal.name
                 + "\". Not present in the new instance.");
         return false;
       }
-      positiveFactSource.replace(subgoal.name, source.get(subgoal.name));
+      positiveFactSource.replace(source.get(
+          subgoal.name,
+          subgoal.variables.size()
+      ));
     }
     return true;
   }
@@ -62,12 +70,18 @@ public class Rule {
    */
   public boolean updateNegativeFactSource(Instance source) {
     for (Subgoal subgoal : negativeOrder) {
-      if (source.get(subgoal.name) == null) {
+      if (source.get(
+          subgoal.name,
+          subgoal.variables.size()
+      ) == null) {
         System.out.println("Unable to update relation \"" + subgoal.name
                 + "\". Not present in the new instance.");
         return false;
       }
-      negativeFactSource.replace(subgoal.name, source.get(subgoal.name));
+      negativeFactSource.replace(source.get(
+          subgoal.name,
+          subgoal.variables.size()
+      ));
     }
     return true;
   }
@@ -92,10 +106,14 @@ public class Rule {
     operator = buildJoin();
 
     for (int i = 0; i < negativeOrder.size(); i++) {
+      Subgoal subgoal = negativeOrder.get(i);
       operator = new AntiJoin(
-              operator,
-              negativeFactSource.get(negativeOrder.get(i).name).operator(),
-              antijoinConditions.get(i)
+          operator,
+          negativeFactSource.get(
+              subgoal.name,
+              subgoal.variables.size()
+          ).operator(),
+          antijoinConditions.get(i)
       );
     }
 
@@ -106,20 +124,31 @@ public class Rule {
    * Positive join is Join of all positive subgoals.
    */
   private Operator buildJoin() {
-    Iterator<Subgoal> it = positiveOrder.iterator();
+    Operator result = null;
 
-    // begin with simple relation operator
-    Operator result = positiveFactSource.get(it.next().name).operator();
-
-    //make a cartesian product of all positive subgoals
-    while (it.hasNext()) {
-      result = new Join(
-              result,
-              positiveFactSource.get(it.next().name).operator(),
-              new TrueCondition()
-      );
+    for (int i = 0; i < positiveOrder.size(); i ++) {
+      Subgoal subgoal = positiveOrder.get(i);
+      
+      // begin with simple relation operator
+      if (i == 0) {
+        result = positiveFactSource.get(
+            subgoal.name,
+            subgoal.variables.size()
+        ).operator();
+      } 
+      //make a cartesian product of all positive subgoals
+      else { 
+        result = new Join(
+            result,
+            positiveFactSource.get(
+                subgoal.name,
+                subgoal.variables.size()
+            ).operator(),
+            new TrueCondition()
+        );
+      }
     }
-
+    
     //make a selection according to condition
     result = new Selection_Projection(result, joinCondition);
 
@@ -130,21 +159,21 @@ public class Rule {
    * Calculates and returns the result of rule and returns it as a relation.
    */
   public Relation result() {
-    Relation result = new Relation(operator);
+    Relation result = new Relation(operator, name);
     return result;
   }
 
   /* Temporary functions [BEGIN] 
        These functions are used for tests
        untill proper translation of Datalog is implemented */
-  public void addPositiveSubgoal(String name, ArrayList<String> variables) {
+  public void addPositiveSubgoal(String name, List<String> variables) {
     positiveOrder.add(new Subgoal(name, variables));
-    positiveFactSource.add(name, new Relation());
+    positiveFactSource.add(new Relation(name, variables.size()));
   }
 
-  public void addNegativeSubgoal(String name, ArrayList<String> variables) {
+  public void addNegativeSubgoal(String name, List<String> variables) {
     negativeOrder.add(new Subgoal(name, variables));
-    negativeFactSource.add(name, new Relation());
+    negativeFactSource.add(new Relation(name, variables.size()));
   }
 
   public void setJoinCondition(TupleTransformation tt) {
@@ -169,13 +198,20 @@ public class Rule {
     public String name;
     public ArrayList<String> variables;
 
-    public Subgoal(String name, ArrayList<String> variables) {
+    public Subgoal(String name, List<String> variables) {
       this.name = name;
-      this.variables = variables;
+      this.variables = new ArrayList<>();
+      this.variables.addAll(variables);
     }
   }
 
-  public String getName() {
-    return name;
-  }
+  // getters 
+
+    public String getName() {
+      return name;
+    }
+    
+    public int getArity() {
+      return arity;
+    }
 }

@@ -1,8 +1,7 @@
 package datalog_ra.base.TupleTransformation;
 
-import datalog_ra.base.relation.Attribute;
-import datalog_ra.base.relation.Tuple;
-import java.util.Iterator;
+import datalog_ra.base.dataStructures.Attribute;
+import datalog_ra.base.dataStructures.Tuple;
 import java.util.LinkedList;
 import java.util.List;
 

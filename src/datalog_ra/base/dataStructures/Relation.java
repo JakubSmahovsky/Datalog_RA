@@ -1,32 +1,64 @@
-package datalog_ra.base.relation;
+package datalog_ra.base.dataStructures;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import datalog_ra.base.operator.Operator;
 
 public class Relation {
-
+  private final String name;
+  private int arity = 0;
   private final ArrayList<Tuple> tuples;
 
-  public Relation() {
+  public Relation(String name, int arity) {
     tuples = new ArrayList<>();
+    this.name = name;
+    this.arity = arity;
   }
-
+  
   /**
    * Materializes Operator o. Creates a Relation out of tuples remaining in the
    * result of Operator o. Does not reset Operator o before nor after execution.
    */
-  public Relation(Operator o) {
+  public Relation(Operator o, String name) {
     tuples = new ArrayList<>();
     Tuple t = o.next();
+    
+    if (t != null) {
+      arity = t.size();
+    }     
+    
     while (t != null) {
       tuples.add(t);
       t = o.next();
     }
+    
+    this.name = name;
   }
   
+  /**
+   * Loads relation from a string of values.
+   * @param relationString should be of form relation_name/arity:tuplevalues
+   *  tuple values are separated by semicolon
+   */
   public Relation(String relationString) {
     tuples = new ArrayList<>();
+    
+    if (relationString.indexOf("/") == -1) {
+      System.out.println("\"Syntax error: \"/\" expected");
+    }
+    
+    if (relationString.indexOf(":") == -1) {
+      System.out.println("\"Syntax error: \":\" expected");
+    }
+    
+    name = relationString.substring(0, relationString.indexOf("/")).trim();
+    arity = Integer.parseInt(
+        relationString.substring(
+            relationString.indexOf("/") +1,
+            relationString.indexOf(":")
+        ).trim()
+    );
+    
     String[] tuplesStrings = relationString.split(";");
     
     for (int i = 1; i < tuplesStrings.length; i++) {
@@ -56,7 +88,7 @@ public class Relation {
 
   @Override
   public String toString() {
-    String result = "";
+    String result = name + "\n";
     for (Iterator<Tuple> it = tuples.iterator(); it.hasNext();) {
       result += it.next().toString();
       if (it.hasNext()) {
@@ -82,7 +114,7 @@ public class Relation {
   }
 
   public Relation copy() {
-    Relation result = new Relation();
+    Relation result = new Relation(name, arity);
     for (Tuple t : tuples) {
       result.add(t.copy());
     }
@@ -116,7 +148,18 @@ public class Relation {
     return result;
   }
 
-  /* Operator of a relation. Similar to iterator but has no remove() function.
+  // getters
+    public String getName() {
+      return name;
+    }
+    
+    public int getArity() {
+      return arity;
+    }
+  
+  /**
+   * Operator of a relation. 
+   * Similar to iterator but has no remove() function.
    */
   private class RelationOperator implements Operator {
 

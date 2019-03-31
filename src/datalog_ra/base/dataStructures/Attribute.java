@@ -1,4 +1,4 @@
-package datalog_ra.base.relation;
+package datalog_ra.base.dataStructures;
 
 public class Attribute {
 

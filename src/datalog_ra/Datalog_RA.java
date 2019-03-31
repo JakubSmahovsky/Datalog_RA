@@ -1,9 +1,8 @@
 package datalog_ra;
 
 import datalog_ra.Test.Test;
-import datalog_ra.base.instance.Instance;
+import datalog_ra.base.dataStructures.Instance;
 import java.util.Scanner;
-import java.io.File;
 
 /**
  *
@@ -38,20 +37,6 @@ public class Datalog_RA {
               System.out.println(EDB);
               break;
             // save command, saves the current EDB to directory in command[1]    
-            case "save":
-              if (command.length < 2) {
-                System.out.println("Directory name is required!");
-                break;
-              }
-              File out = new File("resources/" + command[1]);
-              if (!EDB.snapshot(out, false)) {
-                input = cin.nextLine();
-                System.out.println(input.trim().toUpperCase());
-                if (input.trim().toUpperCase().compareTo("Y") == 0) {
-                  EDB.snapshot(out, true);
-                }
-              }
-              break;
             case "test":
               if (command[1] == null) {
                 System.out.println("Test name is required!");

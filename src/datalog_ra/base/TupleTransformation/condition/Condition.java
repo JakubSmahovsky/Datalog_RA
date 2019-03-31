@@ -1,7 +1,7 @@
 package datalog_ra.base.TupleTransformation.condition;
 
 import datalog_ra.base.TupleTransformation.TupleTransformation;
-import datalog_ra.base.relation.Tuple;
+import datalog_ra.base.dataStructures.Tuple;
 
 public abstract class Condition implements TupleTransformation {
 

@@ -1,6 +1,6 @@
 package datalog_ra.base.operator;
 
-import datalog_ra.base.relation.Tuple;
+import datalog_ra.base.dataStructures.Tuple;
 
 /**
  *

@@ -1,8 +1,8 @@
 package datalog_ra.evaluation;
 
-import datalog_ra.base.instance.Instance;
+import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.base.operator.*;
-import datalog_ra.base.relation.Relation;
+import datalog_ra.base.dataStructures.Relation;
 import java.util.LinkedList;
 
 /**
@@ -10,11 +10,14 @@ import java.util.LinkedList;
  * @author Jakub
  */
 public class Query {
+  int answerArity; // TODO: remove in refactor
 
   private Instance oldOldInstance, oldInstance, newInstance, inputInstance;
   private LinkedList<Rule> rules;
 
-  public Query(Instance inputInstance) {
+  public Query(Instance inputInstance, int answerArity) {
+    this.answerArity = answerArity;
+    
     this.oldOldInstance = new Instance();
     this.oldInstance = new Instance();
     this.inputInstance = inputInstance.copy();
@@ -34,8 +37,8 @@ public class Query {
 
   public void addRule(Rule rule) {
     rules.add(rule);
-    newInstance.add(rule.getName(), new Relation());
-    inputInstance.add(rule.getName(), new Relation());
+    newInstance.add(new Relation(rule.getName(), rule.getArity()));
+    inputInstance.add(new Relation(rule.getName(), rule.getArity()));
   }
 
   /**
@@ -69,7 +72,7 @@ public class Query {
         p.updatePositiveFactSource(newInstance);
         p.buildOperator();
 
-        newInstance.append(p.getName(), p.result());
+        newInstance.append(p.result());
       }
     } while (!innerOldInstance.compareTo(newInstance));
   }
@@ -80,6 +83,8 @@ public class Query {
    */
   private Relation buildAnswer() {
     return new Relation(new Intersection(
-            newInstance.get("answer").operator(), oldInstance.get("answer").operator()));
+        newInstance.get("answer", answerArity).operator(),
+        oldInstance.get("answer", answerArity).operator()
+    ), "answer");
   }
 }

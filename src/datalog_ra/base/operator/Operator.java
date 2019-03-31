@@ -1,9 +1,8 @@
 package datalog_ra.base.operator;
 
-import datalog_ra.base.relation.Tuple;
+import datalog_ra.base.dataStructures.Tuple;
 
 public interface Operator {
-
   /**
    * next() returns the next Tuple in the operator result returns null at the
    * end of the result

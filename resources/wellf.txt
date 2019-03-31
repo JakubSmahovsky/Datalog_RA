@@ -1,2 +1,2 @@
-relation m:
+relation m/1:
 (true)

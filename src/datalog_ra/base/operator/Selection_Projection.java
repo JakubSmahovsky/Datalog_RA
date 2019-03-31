@@ -1,7 +1,7 @@
 package datalog_ra.base.operator;
 
 import datalog_ra.base.TupleTransformation.TupleTransformation;
-import datalog_ra.base.relation.Tuple;
+import datalog_ra.base.dataStructures.Tuple;
 
 /**
  * If net is shorter then Tuples in operator the missing booleans are deemed

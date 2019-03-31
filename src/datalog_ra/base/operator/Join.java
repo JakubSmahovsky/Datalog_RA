@@ -1,7 +1,7 @@
 package datalog_ra.base.operator;
 
 import datalog_ra.base.TupleTransformation.TupleTransformation;
-import datalog_ra.base.relation.Tuple;
+import datalog_ra.base.dataStructures.Tuple;
 
 /* Join operator returns merged tuples from o1 and o2 if they meet the
  * requirements set by tupleTrans.transform() function.

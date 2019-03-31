@@ -1,6 +1,6 @@
 package datalog_ra.Test;
 
-import datalog_ra.base.instance.Instance;
+import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.evaluation.Query;
 
 /**
