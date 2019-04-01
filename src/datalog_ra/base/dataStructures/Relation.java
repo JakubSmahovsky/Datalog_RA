@@ -38,55 +38,11 @@ public class Relation {
       t = o.next();
     }
   }
-  
-  /**
-   * Loads relation from a string of values.
-   * @param relationString should be of form relation_name/arity:tuplevalues
-   *  tuple values are separated by semicolon
-   */
-  public Relation(String relationString) {
-    tuples = new ArrayList<>();
-    
-    // load name and Arity
-    
-    int endName = relationString.indexOf("/");
-    int endArity = relationString.indexOf(":");
-    
-    if (endName == -1) {
-      System.out.println("\"Syntax error: \"/\" expected");
-    }
-    
-    if (endArity == -1) {
-      System.out.println("\"Syntax error: \":\" expected");
-    }
-    
-    name = relationString.substring(0, endName).trim();
-    arity = Integer.parseInt(
-        relationString.substring(
-            endName +1,
-            endArity
-        ).trim()
-    );
-    
-    // load Tuples
-    String[] tuplesStrings = relationString.substring(endArity + 1).split(";");
-    for (int i = 0; i < tuplesStrings.length; i++) {
-      String[] attributesStrings = tuplesStrings[i].split(",");
-      
-      ArrayList<Attribute> attributes = new ArrayList<>();
-      for (String attribString : attributesStrings) {
-        String attribValue = attribString.trim().replaceAll("\\(|\\)", "");
-        
-        attributes.add(new Attribute(attribValue));
-      }
-      this.add(new Tuple(attributes));
-    }
-  }
 
   /* If newTuple is unique in this relation adds newTuple to tuples.
      * Does not add redundant tuples!    
    */
-  public void add(Tuple newTuple) {
+  void add(Tuple newTuple) {
     for (Tuple t : tuples) {
       if (t.subsumed(newTuple)) {
         return;
@@ -99,7 +55,7 @@ public class Relation {
     }
     tuples.add(newTuple);
   }
-
+  
   @Override
   public String toString() {
     String result = name + "\n";

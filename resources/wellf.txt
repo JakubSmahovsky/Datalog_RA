@@ -1,2 +1,1 @@
-relation m/1:
-(true)
+m(true).

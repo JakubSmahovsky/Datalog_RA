@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 /**
  *
@@ -28,14 +29,46 @@ public class Instance {
       return;
     }
     
-    // load file content and split into relation strings
-    byte[] inputBytes = Files.readAllBytes(path);
-    String inputString = new String(inputBytes, Charset.defaultCharset());
-    String[] relationStrings = inputString.split("relation");
+    // load file content and split into rule strings
+    String inputString = new String(Files.readAllBytes(path), Charset.defaultCharset());
+    String[] ruleStrings = inputString.split("\\.");
+    
+    Relation lastUsed = null;
     
     // init and add all relations
-    for (int i = 1; i < relationStrings.length; i++) {
-      relations.add(new Relation(relationStrings[i]));
+    for (int i = 0; i < ruleStrings.length; i++) {
+      String rule = ruleStrings[i];
+      
+      // parse rule
+      String name = rule.substring(0, rule.indexOf("(")).trim();
+      String[] values = rule.substring(
+          rule.indexOf("(")+1,
+          rule.indexOf(")")
+      ).split(",");
+      int arity = values.length;
+      LinkedList<Attribute> attributes = new LinkedList<>();
+      for (String value : values) {
+        attributes.add(new Attribute(value.trim()));
+      }
+      
+      Relation matchingRelation = null;
+      
+      // try to add the new tuple to previously used relation
+      if (lastUsed != null &&
+          lastUsed.getName().compareTo(name) == 0 &&
+          lastUsed.getArity() == arity) {
+        matchingRelation = lastUsed;
+      } // try to add the new tuple to another existing relation
+      else if (get(name, arity) != null) {
+        matchingRelation = get(name, arity);
+      } // make a new relation for the tuple
+      else {
+        matchingRelation = new Relation(name, arity);
+        add(matchingRelation);
+      }
+      
+      matchingRelation.add(new Tuple(attributes));
+      lastUsed = matchingRelation;
     }
   }
 
