@@ -3,22 +3,21 @@ package datalog_ra.base.operator;
 import datalog_ra.base.TupleTransformation.TupleTransformation;
 import datalog_ra.base.dataStructures.Tuple;
 
-public class Selection_Projection implements Operator {
+public class Projection implements Operator {
 
-  private final Operator o;
+  private final Operator operator;
   private long found;
   private final TupleTransformation tupleTrans;
 
-  public Selection_Projection(Operator operator, TupleTransformation tupleTrans) {
-    o = operator;
-    found = 0;
+  public Projection(Operator operator, TupleTransformation tupleTrans) {
+    this.operator = operator;
+    this.found = 0;
     this.tupleTrans = tupleTrans;
   }
 
-  /**
-   * Returns a Tuple from o that has been tranformed acording to the 
-   * transformation specified in tupleTrans.
-   * Does not create duplicates not cary duplicates over from o.
+  /** 
+   * Returns the next tuple from input operator, that has been tranformed 
+   * by the input TupleTransformation. Actively removes duplicates.
    */
   @Override
   public Tuple next() {
@@ -44,33 +43,29 @@ public class Selection_Projection implements Operator {
 
   @Override
   public Operator instance() {
-    Selection_Projection result = new Selection_Projection(o.instance(), tupleTrans);
+    Projection result = new Projection(operator.instance(), tupleTrans);
     result.reset();
     return result;
   }
 
   /** 
-   * Returns a Tuple from o that has been tranformed acording to the 
-   * transformation specified in tupleTrans.
-   * Generates and caries duplicates from o1 and o2.
+   * Returns the next tuple from input operator, that has been tranformed 
+   * by the input TupleTransformation. May create new duplicates in result.
    */
   @Override
   public Tuple nonDistinctNext() {
-    Tuple current = o.nonDistinctNext();
-    while (current != null) {
-      Tuple result = tupleTrans.transform(current);
-      if (result != null) {
-        found++;
-        return result;
-      }
-      current = o.nonDistinctNext();
+    Tuple current = operator.nonDistinctNext();
+    if (current != null) {
+      found++;
+      return tupleTrans.transform(current);
+    } else {
+      return null;
     }
-    return null;
   }
 
   @Override
   public void reset() {
-    o.reset();
+    operator.reset();
     found = 0;
   }
 }

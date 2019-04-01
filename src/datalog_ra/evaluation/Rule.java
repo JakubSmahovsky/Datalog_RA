@@ -117,7 +117,7 @@ public class Rule {
       );
     }
 
-    operator = new Selection_Projection(operator, projectionTransformation);
+    operator = new Projection(operator, projectionTransformation);
   }
 
   /**
@@ -150,7 +150,7 @@ public class Rule {
     }
     
     //make a selection according to condition
-    result = new Selection_Projection(result, joinCondition);
+    result = new Selection(result, joinCondition);
 
     return result;
   }
