@@ -1,7 +1,6 @@
 package datalog_ra.base.dataStructures;
 
 public class Attribute {
-
   private final String value;
 
   public Attribute(String value) {

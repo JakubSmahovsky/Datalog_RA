@@ -12,7 +12,6 @@ import java.util.List;
  * @author Jakub
  */
 public class ProjectionTransformation implements TupleTransformation {
-
   private final List<Integer> attributeOrder;
 
   public ProjectionTransformation(List<Integer> attributeOrder) {

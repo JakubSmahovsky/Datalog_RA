@@ -2,6 +2,7 @@ package datalog_ra;
 
 import datalog_ra.Test.Test;
 import datalog_ra.base.dataStructures.Instance;
+import datalog_ra.programRA.WhileLoop;
 import java.util.Scanner;
 
 /**
@@ -29,8 +30,8 @@ public class Datalog_RA {
           switch (command[0]) {
             // load command, loads the contents of directory in command[1]
             case "load":
-              if (command.length < 2) {
-                System.out.println("Directory name is required!");
+              if (command[1] == null) {
+                System.out.println("File path is required!");
                 break;
               }
               EDB = new Instance(command[1]);
@@ -43,6 +44,13 @@ public class Datalog_RA {
                 break;
               }
               Test.test(command[1], EDB);
+              break;
+            case "ra": 
+              if (command[1] == null) {
+                System.out.println("File path is required!");
+                break;
+              }
+              WhileLoop loop = new WhileLoop(command[1], EDB);
               break;
             case "quit":
               return;

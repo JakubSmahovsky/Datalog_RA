@@ -1,0 +1,2 @@
+prepojenie|2:= union(spoj|2, projection[1,4](join[2=3](prepojenie|2, spoj|2))).
+autobus|1:= projection[1](selection[2=autobus](prestup|2)).

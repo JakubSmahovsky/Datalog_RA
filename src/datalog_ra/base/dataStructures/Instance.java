@@ -170,6 +170,10 @@ public class Instance {
   }
 
   public boolean compareTo(Instance anotherInstance) {
+    if (anotherInstance == null) {
+      return false;
+    }
+    
     if (relations.size() != anotherInstance.size()) {
       return false;
     }

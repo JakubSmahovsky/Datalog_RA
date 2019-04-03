@@ -58,14 +58,10 @@ public class Relation {
   
   @Override
   public String toString() {
-    String result = name + "\n";
+    String result = name + "|" + arity + "\n";
     for (Iterator<Tuple> it = tuples.iterator(); it.hasNext();) {
-      result += it.next().toString();
-      if (it.hasNext()) {
-        result += "\n";
-      }
+      result += it.next().toString() + "\n";
     }
-
     return result;
   }
 
