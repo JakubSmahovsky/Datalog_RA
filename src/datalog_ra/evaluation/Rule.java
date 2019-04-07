@@ -17,19 +17,20 @@ public class Rule {
   private final String name;
   private final int arity;
   
-  private LinkedList<Subgoal> positiveOrder = new LinkedList<>();
-  private LinkedList<Subgoal> negativeOrder = new LinkedList<>();
-  private Instance positiveFactSource = new Instance();
-  private Instance negativeFactSource = new Instance();
+  private final LinkedList<String> head = new LinkedList<>();
+  private final LinkedList<Subgoal> positiveOrder = new LinkedList<>();
+  private final LinkedList<Subgoal> negativeOrder = new LinkedList<>();
+  private final LinkedList<TupleTransformation> inequalities = new LinkedList<>();
+  
+  private final Instance positiveFactSource = new Instance();
+  private final Instance negativeFactSource = new Instance();
+  
   private Operator operator;
 
-  private TupleTransformation projectionTransformation = new TrueCondition();
-  private TupleTransformation joinCondition = new TrueCondition();
-  private LinkedList<TupleTransformation> antijoinConditions = new LinkedList<>();
-
-  public Rule(String name, int arity) {
+  public Rule(String name, List<String> head) {
     this.name = name;
-    this.arity = arity;
+    this.arity = head.size();
+    this.head.addAll(head);
   }
 
   /**
@@ -96,15 +97,11 @@ public class Rule {
     if (positiveOrder.size() == 0) {
       System.out.println("No positive subgoals in rule " + name);
     }
-    // each negative subgoal should have a condition and vice versa
-    if (negativeOrder.size() != antijoinConditions.size()) {
-      System.out.println("Antijoin subgoals and conditions "
-              + "don't match in rule " + name);
-    }
 
     // make join of all positive subgoals
     operator = buildJoin();
 
+    // add antijoin for each negative subgoal
     for (int i = 0; i < negativeOrder.size(); i++) {
       Subgoal subgoal = negativeOrder.get(i);
       operator = new AntiJoin(
@@ -113,11 +110,11 @@ public class Rule {
               subgoal.name,
               subgoal.variables.size()
           ).operator(),
-          antijoinConditions.get(i)
+          buildAntijoinCondition(negativeOrder.get(i))
       );
     }
 
-    operator = new Projection(operator, projectionTransformation);
+    operator = new Projection(operator, buildProjectionTransformation());
   }
 
   /**
@@ -150,9 +147,97 @@ public class Rule {
     }
     
     //make a selection according to condition
-    result = new Selection(result, joinCondition);
+    result = new Selection(result, buildJoinCondition());
 
     return result;
+  }
+  
+  private TupleTransformation buildJoinCondition(){
+    // create a row of all variables' occurrences in positive subgoals
+    ArrayList<String> variables = new ArrayList<>();
+    for (Subgoal subgoal : positiveOrder) {
+      variables.addAll(subgoal.variables);
+    }
+    
+    TransformationSequence result = new TransformationSequence();
+    
+    for (int i = 0; i < variables.size(); i++){
+      // constants begin with lowercase
+      // compare the position to this constant
+      if (Character.isLowerCase(variables.get(i).charAt(0))) {
+        result.add(new CompareConstantCondition(i, variables.get(i)));
+        continue;
+      }
+      
+      // otherwise it's an actual variable
+      // compare it to the next occurrence if it exists
+      for (int j = i+1; j < variables.size(); j++) {
+        if (variables.get(i).compareTo(variables.get(j)) == 0){
+          result.add(new CompareCondition(i, j));
+          break;
+        }
+      }
+    }
+    
+    // filter according to inequalities
+    for (TupleTransformation cond : inequalities) {
+      result.add(cond);
+    }
+    
+    return result;
+  }
+  
+  private TupleTransformation buildAntijoinCondition(Subgoal negativeSubgoal){
+    // create a row of all variables' occurrences in positive subgoals
+    ArrayList<String> variables = new ArrayList<>();
+    for (Subgoal subgoal : positiveOrder) {
+      variables.addAll(subgoal.variables);
+    }
+    
+    TransformationSequence result = new TransformationSequence();
+    
+    for (int i = 0; i < negativeSubgoal.variables.size(); i++){
+      // constants begin with lowercase
+      // compare the position to this constant
+      if (Character.isLowerCase(negativeSubgoal.variables.get(i).charAt(0))) {
+        result.add(new CompareConstantCondition(variables.size() + i, variables.get(i)));
+        continue;
+      }
+      
+      // otherwise it's an actual variable
+      // compare it to the first occurrence in positive subgoals
+      for (int j = 0; j < variables.size(); j++) {
+        if (negativeSubgoal.variables.get(i).compareTo(variables.get(j)) == 0){
+          result.add(new CompareCondition(variables.size() + i, j));
+          break;
+        }
+      }
+    }
+    
+    return result;
+  }
+  
+  private TupleTransformation buildProjectionTransformation(){
+    // create a row of all variables' occurrences in positive subgoals
+    ArrayList<String> variables = new ArrayList<>();
+    for (Subgoal subgoal : positiveOrder) {
+      variables.addAll(subgoal.variables);
+    }
+    
+    LinkedList<Integer> indexes = new LinkedList<>();
+    
+    // for all variables in head
+    for (int i = 0; i < head.size(); i++){
+      // add index for first occurrence in positive subgoals
+      for (int j = 0; j < variables.size(); j++) {
+        if (head.get(i).compareTo(variables.get(j)) == 0){
+          indexes.add(j);
+          break;
+        }
+      }
+    }
+    
+    return new ProjectionTransformation(indexes);
   }
 
   /**
@@ -163,7 +248,7 @@ public class Rule {
     return result;
   }
 
-  /* Temporary functions [BEGIN] 
+  /* Temporary functions [BEGIN]
        These functions are used for tests
        untill proper translation of Datalog is implemented */
   public void addPositiveSubgoal(String name, List<String> variables) {
@@ -176,16 +261,13 @@ public class Rule {
     negativeFactSource.add(new Relation(name, variables.size()));
   }
 
-  public void setJoinCondition(TupleTransformation tt) {
-    joinCondition = tt;
+  public void addInequality(int pos1, int pos2) {
+    inequalities.push(new NegateCondition(new CompareCondition(pos1, pos2)));
   }
-
-  public void addAntijoinCondition(TupleTransformation tt) {
-    antijoinConditions.push(tt);
-  }
-
-  public void setProjectionTransformation(TupleTransformation tt) {
-    projectionTransformation = tt;
+  
+  public void addInequality(int pos, String constant) {
+    inequalities.push(new NegateCondition(
+        new CompareConstantCondition(pos, constant)));
   }
 
   /*Temporary functions [END]*/
@@ -194,7 +276,6 @@ public class Rule {
    * A struct containing all the necessary information about a subgoal.
    */
   private class Subgoal {
-
     public String name;
     public ArrayList<String> variables;
 

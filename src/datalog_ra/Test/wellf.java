@@ -17,31 +17,28 @@ public class wellf extends Query {
 
   public wellf(Instance source) {
     super(source, 1);
-    Rule p = new Rule("answer", 1);
-    p.addPositiveSubgoal("m", new ArrayList());
-    p.addNegativeSubgoal("r", new ArrayList());
-    p.addAntijoinCondition(new CompareCondition(0, 1));
-    p.setProjectionTransformation(
-        new ProjectionTransformation(Arrays.asList(0))
-    );
-    addRule(p);
+    // answer(X):= m(X), not r(X)
+    Rule a = new Rule("answer", Arrays.asList("X"));
+    a.addPositiveSubgoal("m", new ArrayList());
+    a.addNegativeSubgoal("r", new ArrayList());
+    addRule(a);
 
-    Rule r1 = new Rule("r", 1);
+    // r(X):= answer(X)
+    // r(X):= s(X)
+    Rule r1 = new Rule("r", Arrays.asList("X"));
     r1.addPositiveSubgoal("answer", Arrays.asList("X"));
-    r1.setProjectionTransformation(new TrueCondition());
     addRule(r1);
-    Rule r2 = new Rule("r", 1);
+    Rule r2 = new Rule("r", Arrays.asList("X"));
     r2.addPositiveSubgoal("s", Arrays.asList("X"));
-    r2.setProjectionTransformation(new TrueCondition());
     addRule(r2);
 
-    Rule s1 = new Rule("s", 1);
+    // s(X):= answer(X)
+    // s(X):= r(X)
+    Rule s1 = new Rule("s", Arrays.asList("X"));
     s1.addPositiveSubgoal("answer", Arrays.asList("X"));
-    s1.setProjectionTransformation(new TrueCondition());
     addRule(s1);
-    Rule s2 = new Rule("s", 1);
+    Rule s2 = new Rule("s", Arrays.asList("X"));
     s2.addPositiveSubgoal("r", Arrays.asList("X"));
-    s2.setProjectionTransformation(new TrueCondition());
     addRule(s2);
 
     System.out.println(answer());
