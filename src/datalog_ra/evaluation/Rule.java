@@ -46,7 +46,7 @@ public class Rule {
     for (Subgoal subgoal : positiveOrder) {
       if (source.get(
           subgoal.name,
-          subgoal.variables.size()
+          subgoal.arguments.size()
       ) == null) {
         System.out.println("Unable to update relation \"" + subgoal.name
                 + "\". Not present in the new instance.");
@@ -54,7 +54,7 @@ public class Rule {
       }
       positiveFactSource.replace(source.get(
           subgoal.name,
-          subgoal.variables.size()
+          subgoal.arguments.size()
       ));
     }
     return true;
@@ -73,7 +73,7 @@ public class Rule {
     for (Subgoal subgoal : negativeOrder) {
       if (source.get(
           subgoal.name,
-          subgoal.variables.size()
+          subgoal.arguments.size()
       ) == null) {
         System.out.println("Unable to update relation \"" + subgoal.name
                 + "\". Not present in the new instance.");
@@ -81,7 +81,7 @@ public class Rule {
       }
       negativeFactSource.replace(source.get(
           subgoal.name,
-          subgoal.variables.size()
+          subgoal.arguments.size()
       ));
     }
     return true;
@@ -108,7 +108,7 @@ public class Rule {
           operator,
           negativeFactSource.get(
               subgoal.name,
-              subgoal.variables.size()
+              subgoal.arguments.size()
           ).operator(),
           buildAntijoinCondition(negativeOrder.get(i))
       );
@@ -130,7 +130,7 @@ public class Rule {
       if (i == 0) {
         result = positiveFactSource.get(
             subgoal.name,
-            subgoal.variables.size()
+            subgoal.arguments.size()
         ).operator();
       } 
       //make a cartesian product of all positive subgoals
@@ -139,7 +139,7 @@ public class Rule {
             result,
             positiveFactSource.get(
                 subgoal.name,
-                subgoal.variables.size()
+                subgoal.arguments.size()
             ).operator(),
             new TrueCondition()
         );
@@ -153,26 +153,26 @@ public class Rule {
   }
   
   private TupleTransformation buildJoinCondition(){
-    // create a row of all variables' occurrences in positive subgoals
-    ArrayList<String> variables = new ArrayList<>();
+    // create a row of all arguments in positive subgoals
+    ArrayList<String> arguments = new ArrayList<>();
     for (Subgoal subgoal : positiveOrder) {
-      variables.addAll(subgoal.variables);
+      arguments.addAll(subgoal.arguments);
     }
     
     TransformationSequence result = new TransformationSequence();
     
-    for (int i = 0; i < variables.size(); i++){
+    for (int i = 0; i < arguments.size(); i++){
       // constants begin with lowercase
       // compare the position to this constant
-      if (Character.isLowerCase(variables.get(i).charAt(0))) {
-        result.add(new CompareConstantCondition(i, variables.get(i)));
+      if (Character.isLowerCase(arguments.get(i).charAt(0))) {
+        result.add(new CompareConstantCondition(i, arguments.get(i)));
         continue;
       }
       
       // otherwise it's an actual variable
       // compare it to the next occurrence if it exists
-      for (int j = i+1; j < variables.size(); j++) {
-        if (variables.get(i).compareTo(variables.get(j)) == 0){
+      for (int j = i+1; j < arguments.size(); j++) {
+        if (arguments.get(i).compareTo(arguments.get(j)) == 0){
           result.add(new CompareCondition(i, j));
           break;
         }
@@ -188,27 +188,33 @@ public class Rule {
   }
   
   private TupleTransformation buildAntijoinCondition(Subgoal negativeSubgoal){
-    // create a row of all variables' occurrences in positive subgoals
-    ArrayList<String> variables = new ArrayList<>();
+    // create a row of all arguments in positive subgoals
+    ArrayList<String> arguments = new ArrayList<>();
     for (Subgoal subgoal : positiveOrder) {
-      variables.addAll(subgoal.variables);
+      arguments.addAll(subgoal.arguments);
     }
+    int positiveArgumentsCount = arguments.size();
+    // add the negative subgoal's arguments at the end
+    arguments.addAll(negativeSubgoal.arguments);
     
     TransformationSequence result = new TransformationSequence();
     
-    for (int i = 0; i < negativeSubgoal.variables.size(); i++){
+    for (int i = 0; i < negativeSubgoal.arguments.size(); i++){
       // constants begin with lowercase
       // compare the position to this constant
-      if (Character.isLowerCase(negativeSubgoal.variables.get(i).charAt(0))) {
-        result.add(new CompareConstantCondition(variables.size() + i, variables.get(i)));
+      if (Character.isLowerCase(negativeSubgoal.arguments.get(i).charAt(0))) {
+        result.add(new CompareConstantCondition(
+            positiveArgumentsCount + i,
+            negativeSubgoal.arguments.get(i))
+        );
         continue;
       }
       
       // otherwise it's an actual variable
       // compare it to the first occurrence in positive subgoals
-      for (int j = 0; j < variables.size(); j++) {
-        if (negativeSubgoal.variables.get(i).compareTo(variables.get(j)) == 0){
-          result.add(new CompareCondition(variables.size() + i, j));
+      for (int j = 0; j < positiveArgumentsCount + i; j++) {
+        if (negativeSubgoal.arguments.get(i).compareTo(arguments.get(j)) == 0) {
+          result.add(new CompareCondition(positiveArgumentsCount + i, j));
           break;
         }
       }
@@ -218,19 +224,19 @@ public class Rule {
   }
   
   private TupleTransformation buildProjectionTransformation(){
-    // create a row of all variables' occurrences in positive subgoals
-    ArrayList<String> variables = new ArrayList<>();
+    // create a row of all arguments in positive subgoals
+    ArrayList<String> arguments = new ArrayList<>();
     for (Subgoal subgoal : positiveOrder) {
-      variables.addAll(subgoal.variables);
+      arguments.addAll(subgoal.arguments);
     }
     
     LinkedList<Integer> indexes = new LinkedList<>();
     
-    // for all variables in head
+    // for all arguments in head
     for (int i = 0; i < head.size(); i++){
       // add index for first occurrence in positive subgoals
-      for (int j = 0; j < variables.size(); j++) {
-        if (head.get(i).compareTo(variables.get(j)) == 0){
+      for (int j = 0; j < arguments.size(); j++) {
+        if (head.get(i).compareTo(arguments.get(j)) == 0){
           indexes.add(j);
           break;
         }
@@ -251,14 +257,14 @@ public class Rule {
   /* Temporary functions [BEGIN]
        These functions are used for tests
        untill proper translation of Datalog is implemented */
-  public void addPositiveSubgoal(String name, List<String> variables) {
-    positiveOrder.add(new Subgoal(name, variables));
-    positiveFactSource.add(new Relation(name, variables.size()));
+  public void addPositiveSubgoal(String name, List<String> arguments) {
+    positiveOrder.add(new Subgoal(name, arguments));
+    positiveFactSource.add(new Relation(name, arguments.size()));
   }
 
-  public void addNegativeSubgoal(String name, List<String> variables) {
-    negativeOrder.add(new Subgoal(name, variables));
-    negativeFactSource.add(new Relation(name, variables.size()));
+  public void addNegativeSubgoal(String name, List<String> arguments) {
+    negativeOrder.add(new Subgoal(name, arguments));
+    negativeFactSource.add(new Relation(name, arguments.size()));
   }
 
   public void addInequality(int pos1, int pos2) {
@@ -277,12 +283,12 @@ public class Rule {
    */
   private class Subgoal {
     public String name;
-    public ArrayList<String> variables;
+    public ArrayList<String> arguments;
 
-    public Subgoal(String name, List<String> variables) {
+    public Subgoal(String name, List<String> arguments) {
       this.name = name;
-      this.variables = new ArrayList<>();
-      this.variables.addAll(variables);
+      this.arguments = new ArrayList<>();
+      this.arguments.addAll(arguments);
     }
   }
 
