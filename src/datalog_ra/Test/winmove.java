@@ -13,12 +13,18 @@ public class winmove extends Query {
   
   public winmove(Instance source) {
     super(source, 1);
-    // anwer(X):= move(X, Y), not answer(Y)
-    Rule answer = new Rule("answer", Arrays.asList("X"));
-    answer.addPositiveSubgoal("move", Arrays.asList("X", "Y"));
-    answer.addNegativeSubgoal("answer", Arrays.asList("Y"));
-
-    addRule(answer);
+    // win(X):= move(X, Y), not win(Y)
+    Rule win = new Rule("win", Arrays.asList("X"));
+    win.addPositiveSubgoal("move", Arrays.asList("X", "Y"));
+    win.addNegativeSubgoal("win", Arrays.asList("Y"));
+    addRule(win);
+    
+    // ?win(X).
+    Rule query = new Rule("win", Arrays.asList("X"));
+    query.addPositiveSubgoal("win", Arrays.asList("X"));
+    defineQuery(query);    
+    
+    findWFModel();
     System.out.println(answer());
   }
 }

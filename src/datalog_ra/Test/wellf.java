@@ -41,6 +41,8 @@ public class wellf extends Query {
     s2.addPositiveSubgoal("r", Arrays.asList("X"));
     addRule(s2);
 
+    defineQuery(a);
+    findWFModel();
     System.out.println(answer());
   }
 

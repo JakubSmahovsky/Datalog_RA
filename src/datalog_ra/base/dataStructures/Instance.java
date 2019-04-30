@@ -6,13 +6,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
  *
  * @author Jakub
  */
-public class Instance {
+public class Instance implements Iterable<Relation>{
 
   private HashSet<Relation> relations = new HashSet();
 
@@ -81,11 +82,6 @@ public class Instance {
     }
     return null;
   }
-/*
-  public Set<String> getNames() {
-    return relations.keySet();
-  }
-*/
   
   /**
    * Adds Relation newRelation. If a relation called name is allready present it
@@ -205,5 +201,27 @@ public class Instance {
     }
 
     return result;
+  }
+
+  @Override
+  public Iterator<Relation> iterator() {
+    return new InstanceIterator(this);
+  }
+  
+  private class InstanceIterator implements Iterator{
+    private Iterator<Relation> iterator;
+    public InstanceIterator(Instance instance) {
+      iterator = instance.relations.iterator();
+    }
+    
+    @Override
+    public boolean hasNext() {
+      return iterator.hasNext();
+    }
+
+    @Override
+    public Object next() {
+      return iterator.next();
+    }
   }
 }
