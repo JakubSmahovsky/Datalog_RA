@@ -22,7 +22,7 @@ public class winmove extends Query {
     // ?win(X).
     Rule query = new Rule("win", Arrays.asList("X"));
     query.addPositiveSubgoal("win", Arrays.asList("X"));
-    defineQuery(query);    
+    setQuery(query);    
     
     findWFModel();
     System.out.println(answer());

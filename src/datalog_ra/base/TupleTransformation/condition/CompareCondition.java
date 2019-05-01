@@ -7,7 +7,6 @@ import datalog_ra.base.dataStructures.Tuple;
  * @author Jakub
  */
 public class CompareCondition extends Condition {
-
   int pos1, pos2;
 
   public CompareCondition(int pos1, int pos2) {
@@ -18,5 +17,14 @@ public class CompareCondition extends Condition {
   @Override
   boolean eval(Tuple tuple) {
     return tuple.get(pos1).compareTo(tuple.get(pos2));
+  }
+  
+  // getters
+  public int getPos1() {
+    return pos1;
+  }
+  
+  public int getPos2() {
+    return pos2;
   }
 }

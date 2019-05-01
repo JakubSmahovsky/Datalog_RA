@@ -32,5 +32,4 @@ public class ProjectionTransformation implements TupleTransformation {
 
     return new Tuple(attribs);
   }
-
 }

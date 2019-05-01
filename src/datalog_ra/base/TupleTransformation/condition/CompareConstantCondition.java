@@ -8,7 +8,6 @@ import datalog_ra.base.dataStructures.Tuple;
  * @author Jakub
  */
 public class CompareConstantCondition extends Condition {
-
   int pos;
   Attribute value;
 

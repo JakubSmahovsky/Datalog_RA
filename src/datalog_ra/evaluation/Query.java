@@ -1,5 +1,7 @@
 package datalog_ra.evaluation;
 
+import datalog_ra.base.TupleTransformation.InnerJoinTransformation;
+import datalog_ra.base.TupleTransformation.condition.CompareCondition;
 import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.base.operator.*;
 import datalog_ra.base.dataStructures.Relation;
@@ -7,16 +9,16 @@ import java.util.LinkedList;
 
 /**
  * Class representing a datalog program with a query.
- * TODO: currently, calcullation can change EDB relations -> change?
  * @author Jakub
  */
 public class Query {
   private Rule query;
-  private Instance oldOldInstance, oldInstance, newInstance, inputInstance, wf;
-  private LinkedList<Rule> rules;
+  private final LinkedList<Rule> rules;
+  private final Instance inputInstance;
+  private Instance oldInstance, newInstance, oldOldInstance, wf;
 
   public Query(Instance inputInstance, int answerArity) {    
-    this.inputInstance = inputInstance.copy();
+    this.inputInstance = inputInstance;
     this.rules = new LinkedList();
     
     this.oldOldInstance = new Instance();
@@ -28,8 +30,8 @@ public class Query {
    * Performs the evaluation and returns the result of query
    */
   public Relation answer() {
-    this.query.updatePositiveFactSource(wf);
-    this.query.updateNegativeFactSource(wf);
+    this.query.setPositiveFactSource(wf);
+    this.query.setNegativeFactSource(wf);
     query.buildOperator();
     
     return query.result();
@@ -45,34 +47,57 @@ public class Query {
     
     this.oldOldInstance = null;
     
-    this.wf = new Instance();
+    // initialize wf as copy of input instance, since EDB relations don't change
+    this.wf = inputInstance.copy(); 
     for (Relation r1 : newInstance) {
+      // do not count with make intersections of EDB predicates
+      if ((inputInstance.get(r1.getName(), r1.getArity()) != null)) {
+        continue;
+      }
+      
       String name = r1.getName();
       int arity = r1.getArity();
       Relation r2 = oldInstance.get(name, arity);
       
       /* 
-       Make intersection of r1, r2. TODO: In relational algebra it is
+       Make intersection of r1, r2. To make intersection we apply
        innerjoin[^1 = ^1, ..., ^arity = ^arity](r1|arity, r2|arity)
       */
-      Intersection intersection = new Intersection(r1.operator(), r2.operator());
-      
+      LinkedList<CompareCondition> intersectionConditions= new LinkedList<>();
+      for (int i = 0; i < arity; i++) {
+        intersectionConditions.add(new CompareCondition(i, arity + i));
+      }
+      InnerJoinTransformation intersectionTransformation 
+          = new InnerJoinTransformation(intersectionConditions);
+      Join intersection = 
+          new Join(r1.operator(), r2.operator(), intersectionTransformation);
+
       // assign the resulting realtion to wf model instance
       this.wf.add(new Relation(intersection, name));
-      System.out.println(name);
     }
     
     this.oldInstance = null;
     this.newInstance = null;
   }
   
-  public void addRule(Rule rule) {
-    rules.add(rule);
-    newInstance.add(new Relation(rule.getName(), rule.getArity()));
-    inputInstance.add(new Relation(rule.getName(), rule.getArity()));
+  /**
+   * Adds a rule to program. 
+   * The rule cannot define an EDB predicate in it's head.
+   * @return true if rule was added and false if it wasn't
+   */
+  public boolean addRule(Rule rule) {
+    if (inputInstance.get(rule.getName(), rule.getArity()) != null) {
+      System.out.println("Attemplted to add rule " + rule.getName() + "|"
+          + rule.getArity() + " defining EDB predicate");
+      return false;
+    }
+    
+    this.rules.add(rule);
+    this.newInstance.add(new Relation(rule.getName(), rule.getArity()));
+    return true;
   }
   
-  public void defineQuery(Rule query) {
+  public void setQuery(Rule query) {
     this.query = query;
   }
 
@@ -88,7 +113,7 @@ public class Query {
       newInstance = inputInstance.copy();
 
       for (Rule p : rules) { //update (fixate) negative subgoals
-        p.updateNegativeFactSource(oldInstance);
+        p.setNegativeFactSource(oldInstance);
       }
 
       innerCycle();
@@ -104,7 +129,7 @@ public class Query {
     do {
       innerOldInstance = newInstance.copy();
       for (Rule p : rules) {
-        p.updatePositiveFactSource(newInstance);
+        p.setPositiveFactSource(newInstance);
         p.buildOperator();
 
         newInstance.append(p.result());

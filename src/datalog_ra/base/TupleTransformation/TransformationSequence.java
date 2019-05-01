@@ -16,7 +16,7 @@ public class TransformationSequence implements TupleTransformation {
     transformation = new LinkedList();
   }
 
-  public TransformationSequence(List<TupleTransformation> transformation) {
+  public TransformationSequence(List<? extends TupleTransformation> transformation) {
     this.transformation = new LinkedList(transformation);
   }
 

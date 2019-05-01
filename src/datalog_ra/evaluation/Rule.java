@@ -22,8 +22,8 @@ public class Rule {
   private final LinkedList<Subgoal> negativeOrder = new LinkedList<>();
   private final LinkedList<TupleTransformation> inequalities = new LinkedList<>();
   
-  private final Instance positiveFactSource = new Instance();
-  private final Instance negativeFactSource = new Instance();
+  private Instance positiveFactSource = new Instance();
+  private Instance negativeFactSource = new Instance();
   
   private Operator operator;
 
@@ -31,60 +31,6 @@ public class Rule {
     this.name = name;
     this.arity = head.size();
     this.head.addAll(head);
-  }
-
-  /**
-   * Updates sources of facts for positive subgoals. If a relation is missing
-   * from the provided Instance, this function stops and returns false
-   * (TODO(JakubSmahovsky): change this behaviour)
-   *
-   * @param source - the source instance, should contain all relations
-   * coresponding to positive subgoals
-   * @return true if all predicates were updated correctly and false otherwise
-   */
-  public boolean updatePositiveFactSource(Instance source) {
-    for (Subgoal subgoal : positiveOrder) {
-      if (source.get(
-          subgoal.name,
-          subgoal.arguments.size()
-      ) == null) {
-        System.out.println("Unable to update relation \"" + subgoal.name
-                + "\". Not present in the new instance.");
-        return false;
-      }
-      positiveFactSource.replace(source.get(
-          subgoal.name,
-          subgoal.arguments.size()
-      ));
-    }
-    return true;
-  }
-
-  /**
-   * Updates sources of facts for negative subgoals. If a relation is missing
-   * from the provided Instance, this function stops and returns false
-   * (TODO(JakubSmahovsky): change this behaviour)
-   *
-   * @param source - the source instance, should contain all relations
-   * coresponding to positive subgoals
-   * @return true if all predicates were updated correctly and false otherwise
-   */
-  public boolean updateNegativeFactSource(Instance source) {
-    for (Subgoal subgoal : negativeOrder) {
-      if (source.get(
-          subgoal.name,
-          subgoal.arguments.size()
-      ) == null) {
-        System.out.println("Unable to update relation \"" + subgoal.name
-                + "\". Not present in the new instance.");
-        return false;
-      }
-      negativeFactSource.replace(source.get(
-          subgoal.name,
-          subgoal.arguments.size()
-      ));
-    }
-    return true;
   }
 
   /**
@@ -106,7 +52,7 @@ public class Rule {
       Subgoal subgoal = negativeOrder.get(i);
       operator = new AntiJoin(
           operator,
-          negativeFactSource.get(
+          negativeFactSource.forceGet(
               subgoal.name,
               subgoal.arguments.size()
           ).operator(),
@@ -128,7 +74,7 @@ public class Rule {
       
       // begin with simple relation operator
       if (i == 0) {
-        result = positiveFactSource.get(
+        result = positiveFactSource.forceGet(
             subgoal.name,
             subgoal.arguments.size()
         ).operator();
@@ -137,7 +83,7 @@ public class Rule {
       else { 
         result = new Join(
             result,
-            positiveFactSource.get(
+            positiveFactSource.forceGet(
                 subgoal.name,
                 subgoal.arguments.size()
             ).operator(),
@@ -254,9 +200,22 @@ public class Rule {
     return result;
   }
 
-  /* Temporary functions [BEGIN]
-       These functions are used for tests
-       untill proper translation of Datalog is implemented */
+  /**
+   * A struct containing all the necessary information about a subgoal.
+   */
+  private class Subgoal {
+    public String name;
+    public ArrayList<String> arguments;
+
+    public Subgoal(String name, List<String> arguments) {
+      this.name = name;
+      this.arguments = new ArrayList<>();
+      this.arguments.addAll(arguments);
+    }
+  }
+
+  // Datalog program simplified input
+  
   public void addPositiveSubgoal(String name, List<String> arguments) {
     positiveOrder.add(new Subgoal(name, arguments));
     positiveFactSource.add(new Relation(name, arguments.size()));
@@ -275,25 +234,9 @@ public class Rule {
     inequalities.push(new NegateCondition(
         new CompareConstantCondition(pos, constant)));
   }
-
-  /*Temporary functions [END]*/
-
-  /**
-   * A struct containing all the necessary information about a subgoal.
-   */
-  private class Subgoal {
-    public String name;
-    public ArrayList<String> arguments;
-
-    public Subgoal(String name, List<String> arguments) {
-      this.name = name;
-      this.arguments = new ArrayList<>();
-      this.arguments.addAll(arguments);
-    }
-  }
-
+  
   // getters 
-
+  
     public String getName() {
       return name;
     }
@@ -301,4 +244,26 @@ public class Rule {
     public int getArity() {
       return arity;
     }
+  
+  // setters
+    
+  /**
+   * Updates sources of facts for positive subgoals.
+   *
+   * @param instance - the source instance, all relations in subgoal, that 
+   * are not present in this instance will be replaced with new empty relations.
+   */
+  public void setPositiveFactSource(Instance instance) {
+    this.positiveFactSource = instance;
+  }
+
+  /**
+   * Updates sources of facts for negative subgoals.
+   *
+   * @param instance - the source instance, all relations in subgoal, that 
+   * are not present in this instance will be replaced with new empty relations.
+   */
+  public void setNegativeFactSource(Instance instance) {
+    this.negativeFactSource = instance;
+  }
 }

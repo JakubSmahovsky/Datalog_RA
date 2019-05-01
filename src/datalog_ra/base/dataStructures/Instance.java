@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -15,7 +14,7 @@ import java.util.LinkedList;
  */
 public class Instance implements Iterable<Relation>{
 
-  private HashSet<Relation> relations = new HashSet();
+  private LinkedList<Relation> relations = new LinkedList();
 
   public Instance() {
   }
@@ -84,6 +83,18 @@ public class Instance implements Iterable<Relation>{
   }
   
   /**
+   * Same as retrieving a relation using get, but returns a new empty relation
+   * if relation with this name and arity is undefined.
+   */
+  public Relation forceGet(String relationName, int arity) {
+    Relation result = get(relationName, arity);
+    if (result == null) {
+      return new Relation(relationName, arity);
+    }
+    return result;
+  }
+  
+  /**
    * Adds Relation newRelation. If a relation called name is allready present it
    * is NOT replaced.
    *
@@ -135,21 +146,6 @@ public class Instance implements Iterable<Relation>{
         new Union(existing.operator(),relation.operator()),
         relation.getName()
     ));
-    return true;
-  }
-
-  public boolean updateFrom(Instance source) {
-    for (Relation relation : relations) {
-      Relation newRelation = source.get(relation.getName(), relation.getArity());
-      
-      if (newRelation == null) {
-        System.out.println("Unable to update relation " + relation
-                + ". Not present in the new instance.");
-        return false;
-      }
-      
-      replace(newRelation);
-    }
     return true;
   }
 

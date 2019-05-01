@@ -1,8 +1,5 @@
 package datalog_ra.Test;
 
-import datalog_ra.base.TupleTransformation.ProjectionTransformation;
-import datalog_ra.base.TupleTransformation.condition.CompareCondition;
-import datalog_ra.base.TupleTransformation.condition.TrueCondition;
 import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.evaluation.Rule;
 import datalog_ra.evaluation.Query;
@@ -41,7 +38,7 @@ public class wellf extends Query {
     s2.addPositiveSubgoal("r", Arrays.asList("X"));
     addRule(s2);
 
-    defineQuery(a);
+    setQuery(a);
     findWFModel();
     System.out.println(answer());
   }
