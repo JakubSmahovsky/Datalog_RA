@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class wellf extends Query {
 
   public wellf(Instance source) {
-    super(source, 1);
+    super(source);
     // answer(X):= m(X), not r(X)
     Rule a = new Rule("answer", Arrays.asList("X"));
     a.addPositiveSubgoal("m", new ArrayList());

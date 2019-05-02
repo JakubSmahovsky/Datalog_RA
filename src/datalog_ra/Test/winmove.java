@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class winmove extends Query {
   
   public winmove(Instance source) {
-    super(source, 1);
+    super(source);
     // win(X):= move(X, Y), not win(Y)
     Rule win = new Rule("win", Arrays.asList("X"));
     win.addPositiveSubgoal("move", Arrays.asList("X", "Y"));

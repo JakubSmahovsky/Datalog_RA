@@ -13,17 +13,12 @@ import java.util.LinkedList;
  */
 public class Query {
   private Rule query;
-  private final LinkedList<Rule> rules;
+  private final LinkedList<Rule> rules = new LinkedList();
   private final Instance inputInstance;
   private Instance oldInstance, newInstance, oldOldInstance, wf;
 
-  public Query(Instance inputInstance, int answerArity) {    
+  public Query(Instance inputInstance) {    
     this.inputInstance = inputInstance;
-    this.rules = new LinkedList();
-    
-    this.oldOldInstance = new Instance();
-    this.oldInstance = new Instance();
-    this.newInstance = inputInstance.copy();
   }
 
   /**
@@ -39,10 +34,14 @@ public class Query {
   
   /**
    * Finds the limits of instance sequences and create their intersections, 
-   * which make up well founded model. After that reassing used instances,
+   * which make up well founded model. Then deassigns used instances,
    * so that they can be picked up by garbage-collection.
    */
   public void findWFModel() {
+    this.oldOldInstance = new Instance();
+    this.oldInstance = new Instance();
+    this.newInstance = new Instance();
+    
     outerCycle();
     
     this.oldOldInstance = null;
@@ -93,7 +92,6 @@ public class Query {
     }
     
     this.rules.add(rule);
-    this.newInstance.add(new Relation(rule.getName(), rule.getArity()));
     return true;
   }
   
@@ -107,7 +105,7 @@ public class Query {
    * instance.
    */
   private void outerCycle() {
-    while (!oldOldInstance.compareTo(newInstance)) {
+    do {
       oldOldInstance = oldInstance;
       oldInstance = newInstance;
       newInstance = inputInstance.copy();
@@ -117,7 +115,7 @@ public class Query {
       }
 
       innerCycle();
-    }
+    } while (!oldOldInstance.compareTo(newInstance));
   }
 
   /**
