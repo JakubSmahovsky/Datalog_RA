@@ -3,6 +3,7 @@ package datalog_ra;
 import datalog_ra.Test.Test;
 import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.programRA.WhileLoop;
+import datalog_ra.programRA.programRA;
 import java.util.Scanner;
 
 /**
@@ -50,7 +51,8 @@ public class Datalog_RA {
                 System.out.println("File path is required!");
                 break;
               }
-              WhileLoop loop = new WhileLoop(command[1], EDB);
+              programRA prog = new programRA(command[1]);
+              prog.run(EDB);
               break;
             case "quit":
               return;

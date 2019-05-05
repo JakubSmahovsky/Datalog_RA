@@ -1,226 +1,370 @@
 package datalog_ra.programRA;
-
-import datalog_ra.base.TupleTransformation.*;
-import datalog_ra.base.TupleTransformation.condition.*;
 import datalog_ra.base.dataStructures.Instance;
 import datalog_ra.base.dataStructures.Relation;
+import datalog_ra.base.TupleTransformation.*;
+import datalog_ra.base.TupleTransformation.condition.*;
 import datalog_ra.base.operator.*;
 import static java.lang.Integer.parseInt;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
  *
  * @author Jakub
  */
-public class Assignment {
-  private final String relationName;
-  private final int relationArity;
-  private final String body;
-  private Operator operator;
-  
-  public Assignment(String assignemntString, Instance source) {
-    String[] headBody = assignemntString.split(":=");
-    if (headBody.length != 2) {
-      System.out.println("Syntax error in assignement \"" 
-          + assignemntString + "\"");
-    }
-    
-    String[] nameArity = headBody[0].split("\\|");
-    if (nameArity.length != 2) {
-      System.out.println("Syntax error in head \"" + headBody[0] + "\"");
-    }
-    
-    if (!isNumeric(nameArity[1])) {
-      System.out.println("Syntax error non numeric arity in head \"" 
-          + headBody[0] + "\"");
-    }
-    
-    this.relationName = nameArity[0].trim();
-    this.relationArity = parseInt(nameArity[1].trim());
-    this.body = headBody[1];
+public class Assignment extends RASubprogram{
+  private String code;
+  private String relationName;
+  private int pos;
+  private final int bodyBegin;
+
+  public Assignment(String sourceCode) {
+    this.code = sourceCode;
+    pos = 0;
+    head();
+    bodyBegin = pos;
   }
   
-  public void rebuild(Instance source) {
-    this.operator = build(new StringBuilder(body), source);
+  @Override
+  public void run(Instance target) {
+    pos = bodyBegin;
+    target.replace(new Relation(operator(target), relationName));
   }
   
-  private Operator build(StringBuilder exp, Instance source) {
-    String statement = chunk(exp);
-    if (!Arrays.asList(',', '.', '[', '(', ')').contains(exp.charAt(0))) {
-      System.out.println("Syntax error unexpected character " + exp.charAt(0));
-      return null;
-    }
-    exp.delete(0, 1);
+  private boolean head() {
+    int begin = pos;
+    String name = symbol();
     
-    if (statement.compareTo("union") == 0) {
-      // expecting "operator,operator)"
-      Operator o1 = build(exp, source);
-      Operator o2 = build(exp, source);
+    if (name.length() == 1 && isSeparator(name.charAt(0))) {
+      System.out.println("Syntax error, expected relation name at " 
+          + sample(begin));
+      return false;
+    }
+    
+    // name seems ok
+    this.relationName = name;
+    expect(":");
+    expect("=");
+    
+    return true;
+  }
+  
+  private Operator operator(Instance source) {
+    int begin = pos;
+    String symbol = symbol();
+
+    if (symbol.compareTo("antijoin") == 0) {
+      // antijoin[cond](o1, o2)
+      TupleTransformation cond = condition();
+      expect("(");
+      Operator o1 = operator(source);
+      expect(",");
+      Operator o2 = operator(source);
+      expect(")");
       
-      exp.delete(0, 1); // delete separating char after operator
+      return new AntiJoin(o1, o2, cond);
+    }
+    
+    if (symbol.compareTo("join") == 0) {
+      // join[cond](o1, o2)
+      TupleTransformation cond = condition();
+      expect("(");
+      Operator o1 = operator(source);
+      expect(",");
+      Operator o2 = operator(source);
+      expect(")");
+      
+      return new Join(o1, o2, cond);
+    }
+    
+    if (symbol.compareTo("projection") == 0) {
+      // projection[trans](o)
+      TupleTransformation trans = projectionTransformation();
+      expect("(");
+      Operator o = operator(source);
+      expect(")");
+      
+      return new Projection(o, trans);
+    }
+    
+    if (symbol.compareTo("selection") == 0) {
+      // selection[cond](o)
+      TupleTransformation cond = condition();
+      expect("(");
+      Operator o = operator(source);
+      expect(")");
+      
+      return new Selection(o, cond);
+    }
+    
+    if (symbol.compareTo("union") == 0) {
+      // union(o1, o2)
+      expect("(");
+      Operator o1 = operator(source);
+      expect(",");
+      Operator o2 = operator(source);
+      expect(")");
+      
       return new Union(o1, o2);
     }
+    // name|arity
     
-    if (statement.compareTo("intersection") == 0) {
-      // expecting "operator,operator)"
-      Operator o1 = build(exp, source);
-      Operator o2 = build(exp, source);
-      
-      exp.delete(0, 1); // delete separating char after operator
-      return new Intersection(o1, o2);
-    }
-    
-    if (statement.compareTo("selection") == 0) {
-      // expecting "condition](operator)"
-      TupleTransformation condition = buildCondition(exp);
-      Operator o = build(exp, source);
-      
-      exp.delete(0, 1); // delete separating char after operator
-      return new Selection(o, condition);
-    }
-    
-    if (statement.compareTo("projection") == 0) {
-      // expecting "condition](operator)"
-      TupleTransformation condition = buildProjectionTT(exp);
-      Operator o = build(exp, source);
-      
-      exp.delete(0, 1); // delete separating char after operator
-      return new Projection(o, condition);
-    }
-    
-    if (statement.compareTo("join") == 0) {
-      // expecting "condition](operator, operator)"
-      TupleTransformation condition = buildCondition(exp);
-      Operator o1 = build(exp, source);
-      Operator o2 = build(exp, source);
-      
-      exp.delete(0, 1); // delete separating char after operator
-      return new Join(o1, o2, condition);
-    }
-    
-    if (statement.compareTo("antijoin") == 0) {
-      // expecting "condition](operator, operator)"
-      TupleTransformation condition = buildCondition(exp);
-      Operator o1 = build(exp, source);
-      Operator o2 = build(exp, source);
-      
-      exp.delete(0, 1); // delete separating char after operator
-      return new AntiJoin(o1, o2, condition);
-    }
-    
-    // edb relation  
-    String[] nameArity = statement.split("\\|");
-    if (nameArity.length != 2) {
-      System.out.println("Syntax error at statement \"" + statement + "\"");
+    String name = symbol;
+    expect("|");
+    symbol = symbol();
+    if (!isNumeric(symbol)) {
+      System.out.println("Syntax error, expected relation arity after \"|\" at "
+          + sample(begin));
       return null;
     }
-    exp.delete(0, 1); // delete separating char after relation
-    return source.get(nameArity[0], parseInt(nameArity[1])).operator();
-  }
-
-  private TupleTransformation buildProjectionTT(StringBuilder exp) {
-    LinkedList<Integer> attributeOrder = new LinkedList<>();
-    // expecting "int, int, ..., int"
-    do {
-      String attrNum = chunk(exp);
-      if (!isNumeric(attrNum)) {
-        System.out.println("Syntax error expected attribute index,"
-            + " got \"" + attrNum + "\"");
-        return null;
-      }
-
-      attributeOrder.add(parseInt(attrNum)-1); // -1 becasue indexing from 0
-      
-      // delete "," or "]"
-      if (!Arrays.asList(',', ']').contains(exp.charAt(0))) {
-        System.out.println("Syntax error unexpected character " + exp.charAt(0));
-        return null;
-      }
-      exp.delete(0, 1);
-    } while (exp.charAt(0) != '(');
-
-    exp.delete(0, 1); // delete "("
-    return new ProjectionTransformation(attributeOrder);
-  }
-  
-  private TupleTransformation buildCondition(StringBuilder exp) {
-    // TODO: don't use sequence for a single condition
-    TransformationSequence tt = new TransformationSequence();
-    // expecting conditions like "int=int" or "int=const" or "int!=int" ...
-    do {
-      String cond = chunk(exp);
-      
-      if (!cond.contains("=")) {
-        System.out.println("Syntax error \"=\" expected in condition" + cond);
-        return null;
-      }
-      
-      String[] vals;
-      if (cond.contains("!")) {
-        vals = cond.split("!=");    
-      } else {
-        vals = cond.split("=");
-      }
-      
-      if (vals.length != 2) {
-        System.out.println("Syntax error "
-            + "wrong number of comarisons in condition" + cond);
-      }
-      
-      Condition condition;
-      
-      if (isNumeric(vals[1])) {
-        // expecting "int = int" condition
-        condition = new CompareCondition(
-            parseInt(vals[0].trim())-1, //-1 because indexing from 0
-            parseInt(vals[1].trim())-1 //-1 because indexing from 0
-        ); 
-      } else {
-        // expecting "int = const" condition
-        condition = new CompareConstantCondition(
-            parseInt(vals[0].trim())-1, vals[1] //-1 because indexing from 0
-        );
-      }
-      
-      if (cond.contains("!")) {
-        tt.add(new NegateCondition(condition));
-      } else {
-        tt.add(condition);
-      }
-      
-      // delete "," or "]"
-      if (!Arrays.asList(',', ']').contains(exp.charAt(0))) {
-        System.out.println("Syntax error unexpected character " + exp.charAt(0));
-        return null;
-      }
-      exp.delete(0, 1);
-      
-    } while (exp.charAt(0) != '(');
+    int arity = parseInt(symbol);
     
-    exp.delete(0, 1); // delete "("
-    return tt;
+    return source.forceGet(name, arity).operator();
   }
   
-  private String chunk(StringBuilder expression) {
-    String statement = "";
-    for (int i = 0; i < expression.length(); i++) {
-      char c = expression.charAt(i);
+  private TupleTransformation projectionTransformation() {
+    int transformBegin = pos;
+    expect("[");
+    
+    LinkedList<Integer> positions = new LinkedList<>();
+
+    while(pos < code.length()) {
+      int positionBegin = pos;
+      expect("^");
       
-      if (c == '[' || c == ']' || c == '(' || c== ')' || c == ',' || c == '.') {
-      expression.delete(0, i);
-        return statement.trim();
+      // read position number
+      String numString = symbol();
+      if (!isNumeric(numString)) {
+        System.out.println("Syntax error, expected a numeric position, at "
+            + sample(positionBegin));
+        return null;
       }
-      statement += c;
+      
+      positions.add(parseInt(numString) -1); //index from 0;
+      
+      String separator = symbol();
+      // end after "]"
+      if (separator.length() == 1 && separator.charAt(0) == ']') {
+        return new ProjectionTransformation(positions);
+      }
+      
+      // continue after "," 
+      if (separator.length() == 1 && separator.charAt(0) == ',') {
+        continue;
+      }
+      
+      // incorrect symbol
+      System.out.println("Syntax error, expected \",\" or \"]\", got "
+          + separator + " at " + sample(positionBegin));
+      return null;
     }
+    
+    // no closing symbol found
+    System.out.println("Syntax error, expected \"]\" after "
+            + sample(transformBegin));
     return null;
   }
   
-  /**
-   * There must be a better way. However this does PRECISELY what I want.
-   * Returns true if parseInt() won't throw.
-   */
-  public static boolean isNumeric(String strNum) {
+  private TupleTransformation condition() {
+    int conditionBegin = pos;
+    expect("[");
+    
+    TupleTransformation condition = null;
+    TransformationSequence sequence = null;
+
+    while(pos < code.length()) {
+      int compareBegin = pos;
+      Condition newCondition = null;
+      boolean negate = false;
+      
+      // declaration for both compare constant and compare - only 2 are used
+      Integer position1 = null;
+      String constant = null;
+      
+      // read left side
+      String symbol = symbol();
+      if (symbol.length() == 1 && symbol.charAt(0) == '^') {
+        // position
+        String numString = symbol();
+        if (!isNumeric(numString)) {
+          System.out.println("Syntax error, expected a numeric position, at "
+              + sample(compareBegin));
+          return null;
+        }
+        
+        position1 = parseInt(numString) -1; //index from 0
+      } else {
+        // constant
+        if (!Character.isDigit(symbol.charAt(0)) 
+            && !Character.isLowerCase(symbol.charAt(0))) {
+          System.out.println("Syntax error, expeted position or constant at "
+              + sample(compareBegin));
+          return null;
+        }
+        
+        constant = symbol;
+      }
+      
+      // read equality mark
+      int markBegin = pos;
+      String mark = symbol();
+      if (mark.length() == 1 && mark.charAt(0) == '!') {
+        negate = true;
+        mark = symbol();
+      }
+      
+      if (mark.length() == 1 && mark.charAt(0) != '=') {
+        System.out.println("Syntax error, expeted \"=\" at "
+            + sample(markBegin));
+        return null;
+      }
+      
+      // read right side
+      symbol = symbol();
+      if (symbol.length() == 1 && symbol.charAt(0) == '^') {
+        // position
+        String numString = symbol();
+        if (!isNumeric(numString)) {
+          System.out.println("Syntax error, expected a numeric position, at "
+              + sample(compareBegin));
+          return null;
+        }
+        if (position1 == null) {
+          newCondition = 
+              new CompareConstantCondition(parseInt(numString) -1, constant);
+        } else {
+          newCondition = new CompareCondition(position1,parseInt(numString) -1);
+        }
+      } else {
+        // constant
+        if (!Character.isDigit(symbol.charAt(0)) 
+            && !Character.isLowerCase(symbol.charAt(0))) {
+          System.out.println("Syntax error, expeted position or constant at "
+              + sample(compareBegin));
+          return null;
+        }
+        
+        if (constant == null) {
+          newCondition = new CompareConstantCondition(position1, symbol);
+        } else {
+          System.out.println("Syntax error, trying to compare 2 constants at "
+              + sample(compareBegin));
+        }
+      }
+      
+      if (negate) {
+        newCondition = new NegateCondition(newCondition);
+      }
+      
+      // assign to result
+      if (sequence != null) {
+        sequence.add(newCondition);
+      } else if (condition == null) {
+        condition = newCondition;
+      } else {
+        // change to sequence
+        sequence = new TransformationSequence();
+        sequence.add(condition);
+        sequence.add(newCondition);
+        condition = null;
+      }
+
+      // read separator
+      String separator = symbol();
+      // end after "]"
+      if (separator.length() == 1 && separator.charAt(0) == ']') {
+        if (sequence != null) {
+          return sequence;
+        } else if (condition != null){
+          return condition;
+        } else {
+          return new TrueCondition();
+        }
+      }
+      
+      // continue after "," 
+      if (separator.length() == 1 && separator.charAt(0) == ',') {
+        continue;
+      }
+      
+      // incorrect symbol
+      System.out.println("Syntax error, expected \",\" or \"]\", got "
+          + separator + " at " + sample(compareBegin));
+    }
+    
+    // no closing symbol found
+    System.out.println("Syntax error, expected \"]\" after "
+        + sample(conditionBegin));
+    return null;
+  }
+  
+  // helper methods
+  
+  private String symbol() {
+    skipWhitespace();
+    
+    // try to match separators
+    if (isSeparator(code.charAt(pos))) {
+      String result = "" + code.charAt(pos);
+      pos++; // char is read
+      return result;
+    }
+
+    StringBuilder result = new StringBuilder();
+    while(pos < code.length()) {
+      // end after whitespace
+      if (skipWhitespace()) {
+        return result.toString();
+      }
+      
+      // end after separator
+      if (isSeparator(code.charAt(pos))) {
+        // do not read separator (no pos++)
+        return result.toString();
+      }
+      
+      // add character
+      result.append(code.charAt(pos));
+      pos++; // char is read
+    }
+    
+    return result.toString();
+  }
+  
+  private boolean skipWhitespace() {
+    boolean skipped = false;
+    while ( pos < code.length() && (
+            code.charAt(pos) == ' '  ||
+            code.charAt(pos) == '\t' ||
+            // newline... I think
+            Character.hashCode(code.charAt(pos)) == 10 ||
+            Character.hashCode(code.charAt(pos)) == 13
+          )) {
+      pos++;
+      skipped = true;
+    }
+    return skipped;
+  }
+  
+  private boolean expect(String symbol) {
+    int begin = pos;
+    if (symbol().compareTo(symbol) != 0) {
+      System.out.println("Syntax error, expected \"" + symbol 
+          + "\" at " + sample(begin));
+      return false;
+    }
+    return true;
+  }
+  
+  private String sample(int pos) {
+    if (code.length() - pos <= 20) {
+      return "\"" + code.substring(pos).trim() + "\"";
+    }
+    else {
+      return "\"" + code.substring(pos, pos + 17).trim() + "...\"";
+    }
+  }
+  
+  private static boolean isNumeric(String strNum) {
     try {
         int d = parseInt(strNum);
     } catch (NumberFormatException | NullPointerException nfe) {
@@ -229,16 +373,15 @@ public class Assignment {
     return true;
   }
   
-  // getters
-    public String getRelationName() {
-      return relationName;
+  private static boolean isSeparator(char symbol) {
+    for (char separator : separators) {
+      if (symbol == separator) {
+        return true;
+      }
     }
-        
-    public int getRelationArity() {
-      return relationArity;
-    }
-    
-    public Operator getOperator() {
-      return operator;
-    }
+    return false;
+  }
+  
+  private static final char[] separators = 
+      {'[', ']', '(', ')', ':', '=', '!', '^', '|', ',', '?'};
 }

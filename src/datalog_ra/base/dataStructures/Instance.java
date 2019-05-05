@@ -110,14 +110,15 @@ public class Instance implements Iterable<Relation>{
   }
 
   /**
-   * Replaces the Relation called name with Relation relation. Does not add
-   * Relation relation if no Relation called name existed before.
+   * Replaces the Relation called name with Relation relation or
+   * adds it, if no such relation exists.
    *
-   * @return true if a relation was changed and false otherwise
+   * @return true if a relation was replaced and false in new one was added.
    */
   public boolean replace(Relation relation) {
     Relation existing = get(relation.getName(), relation.getArity());
     if (existing == null) {
+      relations.add(relation);
       return false;
     }
     
