@@ -36,7 +36,7 @@ public class Datalog_RA {
                 break;
               }
               EDB = new Instance(command[1]);
-              System.out.println(EDB);
+              System.out.println("Load done!");
               break;
             // save command, saves the current EDB to directory in command[1]    
             case "test":
@@ -52,7 +52,10 @@ public class Datalog_RA {
                 break;
               }
               programRA prog = new programRA(command[1]);
+              long startTime = System.nanoTime();
               prog.run(EDB);
+              System.out.println("query time: " 
+                  + (System.nanoTime() - startTime )/1000000 );
               break;
             case "quit":
               return;

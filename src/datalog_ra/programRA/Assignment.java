@@ -383,5 +383,5 @@ public class Assignment extends RASubprogram{
   }
   
   private static final char[] separators = 
-      {'[', ']', '(', ')', ':', '=', '!', '^', '|', ',', '?'};
+      {'[', ']', '(', ')', ':', '=', '!', '^', '|', ',', '?', '.'};
 }

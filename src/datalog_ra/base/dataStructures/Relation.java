@@ -43,14 +43,14 @@ public class Relation {
      * Does not add redundant tuples!    
    */
   void add(Tuple newTuple) {
+    if (newTuple.size() != arity) {
+        System.out.println("Error: arity mismatch at " 
+            + this.name + "\\" + arity + " adding " + newTuple);
+    }
+    
     for (Tuple t : tuples) {
       if (t.subsumed(newTuple)) {
         return;
-      }
-      
-      if (t.size() != arity) {
-        System.out.println("Error: arity mismatch at " 
-            + this.name + "\\" + arity + " adding " + t);
       }
     }
     tuples.add(newTuple);
