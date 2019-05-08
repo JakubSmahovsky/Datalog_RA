@@ -28,7 +28,7 @@ public class Projection implements Operator {
       boolean distinct = true;
       for (int i = 1; i < found; i++) {
         old = p.nonDistinctNext();
-        if (old.subsumed(current)) {
+        if (old.subsums(current)) {
           distinct = false;
           break;
         }

@@ -18,6 +18,6 @@ public class CompareConstantCondition extends Condition {
 
   @Override
   boolean eval(Tuple tuple) {
-    return tuple.get(pos).compareTo(value);
+    return tuple.get(pos).subsums(value);
   }
 }

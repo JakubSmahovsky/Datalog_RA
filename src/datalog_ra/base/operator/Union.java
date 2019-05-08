@@ -42,7 +42,7 @@ public class Union implements Operator {
         boolean distinct = true;
 
         while (t1 != null) {
-          if (t1.subsumed(t2)) { //found duplicate
+          if (t1.subsums(t2)) { //found duplicate
             distinct = false;
             break;
           }

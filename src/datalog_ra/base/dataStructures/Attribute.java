@@ -11,7 +11,7 @@ public class Attribute {
     return value;
   }
 
-  public boolean compareTo(Attribute attribute) {
+  public boolean subsums(Attribute attribute) {
     return (value.compareTo(attribute.getValue()) == 0);
   }
 

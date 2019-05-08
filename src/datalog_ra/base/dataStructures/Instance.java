@@ -20,14 +20,14 @@ public class Instance implements Iterable<Relation>{
   }
   
   public Instance(String pathString) throws Exception {
-    Path path = Paths.get("resources\\" + pathString);
+    Path path = Paths.get("resources", pathString);
     
     // verify file exists
     if (!Files.exists(path)) {
       System.out.println("File " + pathString
           + " does not exist within the resources directory.");
       return;
-    }
+    } 
     
     // load file content and split into rule strings
     String inputString = new String(Files.readAllBytes(path), Charset.defaultCharset());
@@ -48,7 +48,14 @@ public class Instance implements Iterable<Relation>{
       int arity = values.length;
       LinkedList<Attribute> attributes = new LinkedList<>();
       for (String value : values) {
-        attributes.add(new Attribute(value.trim()));
+        value = value.trim();
+        if (Character.isLowerCase(value.charAt(0)) || 
+            Character.isDigit(value.charAt(0))) {
+          attributes.add(new Attribute(value.trim()));
+        } else {
+          System.out.println("Syntax error, attempted to used invalid attribute"
+                  + " value: " + value);
+        }
       }
       
       Relation matchingRelation = null;

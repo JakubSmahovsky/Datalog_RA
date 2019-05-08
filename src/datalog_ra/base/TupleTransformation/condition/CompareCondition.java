@@ -16,7 +16,7 @@ public class CompareCondition extends Condition {
 
   @Override
   boolean eval(Tuple tuple) {
-    return tuple.get(pos1).compareTo(tuple.get(pos2));
+    return tuple.get(pos1).subsums(tuple.get(pos2));
   }
   
   // getters

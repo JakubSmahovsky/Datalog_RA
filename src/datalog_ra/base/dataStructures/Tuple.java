@@ -19,7 +19,7 @@ public class Tuple implements Iterable<Attribute> {
     attributes.addAll(t2.attributes);
   }
 
-  public boolean subsumed(Tuple tuple) {
+  public boolean subsums(Tuple tuple) {
     if (tuple == null) {
       return false;
     }
@@ -29,29 +29,7 @@ public class Tuple implements Iterable<Attribute> {
     Iterator<Attribute> it = tuple.iterator();
     for (Attribute a : attributes) {
       //attributes differ
-      if (!(it.next().compareTo(a))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   *
-   * @param tuple
-   * @return
-   */
-  public boolean compareTo(Tuple tuple) {
-    if (tuple == null) {
-      return false;
-    }
-    if (this.size() != tuple.size()) {
-      return false;
-    }
-    Iterator<Attribute> it = tuple.iterator();
-    for (Attribute a : attributes) {
-      //attributes differ
-      if (!(it.next().compareTo(a))) {
+      if (!(it.next().subsums(a))) {
         return false;
       }
     }

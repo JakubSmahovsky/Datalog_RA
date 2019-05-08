@@ -2,7 +2,6 @@ package datalog_ra;
 
 import datalog_ra.Test.Test;
 import datalog_ra.base.dataStructures.Instance;
-import datalog_ra.programRA.WhileLoop;
 import datalog_ra.programRA.programRA;
 import java.util.Scanner;
 
@@ -11,12 +10,6 @@ import java.util.Scanner;
  * @author Jakub
  */
 public class Datalog_RA {
-
-  public static final String ANSI_RED = "\u001B[31m";
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_BLUE = "\u001B[34m";
-  public static final String ANSI_GREEN = "\u001B[32m";
-
   public static void main(String[] args) throws Exception {
 
     Scanner cin = new Scanner(System.in);
@@ -35,7 +28,13 @@ public class Datalog_RA {
                 System.out.println("File path is required!");
                 break;
               }
-              EDB = new Instance(command[1]);
+              try {
+                EDB = new Instance(command[1]);
+              }
+              catch (Exception e) {
+                System.out.println("Invalid file: " + command[1]);
+                break;
+              }
               System.out.println("Load done!");
               break;
             // save command, saves the current EDB to directory in command[1]    
@@ -51,7 +50,15 @@ public class Datalog_RA {
                 System.out.println("File path is required!");
                 break;
               }
-              programRA prog = new programRA(command[1]);
+              programRA prog;
+              try {
+                prog = new programRA(command[1]);
+              }
+              catch (Exception e) {
+                System.out.println("Invalid file: " + command[1]);
+                break;
+              }
+              System.out.println("Load done!");
               long startTime = System.nanoTime();
               prog.run(EDB);
               System.out.println("query time: " 

@@ -49,7 +49,7 @@ public class Relation {
     }
     
     for (Tuple t : tuples) {
-      if (t.subsumed(newTuple)) {
+      if (t.subsums(newTuple)) {
         return;
       }
     }
@@ -107,7 +107,7 @@ public class Relation {
   public boolean contains(Tuple t) {
     boolean result = false;
     for (Tuple my : tuples) {
-      if (my.compareTo(t)) {
+      if (my.subsums(t)) {
         result = true;
       }
     }
