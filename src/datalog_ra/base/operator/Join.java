@@ -22,7 +22,7 @@ public class Join implements Operator {
   }
 
   /**
-   * Function next() returns the next tuple that fills the requirements set in
+   * Returns the next tuple that fills the requirements set in
    * tuple transformation.
    */
   @Override
@@ -49,7 +49,7 @@ public class Join implements Operator {
   }
 
   /**
-   * Function next() returns the next tuple that fills the requirements set in
+   * Returns the next tuple that fills the requirements set in
    * tuple transformation.
    */
   @Override

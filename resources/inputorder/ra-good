@@ -1,0 +1,10 @@
+result:=
+  join[^2 != ^4] (
+    selection[^2 = 0](
+      i100000r100|2
+	),
+    selection[^2 = 0] (
+      i100000r10|2
+    )
+  ).
+?result|4.

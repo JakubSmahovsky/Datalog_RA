@@ -21,17 +21,15 @@ public class AntiJoin implements Operator {
     this.tupleTrans = tupleTrans;
   }
 
-  /* Method returns the next tuple in AntiJoin of o1 and o2 by 
-     * conditions set in TupleTransformation.
-     * Returns the result of o1.next() if transformation is not null
-     * Does not return the result of transform()!
-     * Generates and caries duplicates from o1 and o2 
+  /** 
+   * Returns the next tuple in AntiJoin of o1 and o2 by 
+   * conditions set in TupleTransformation.
+   * Returns the result of o1.next() if transformation is not null
+   * Does not return the result of transform()!
+   * Generates and caries duplicates from o1 and o2 
    */
   @Override
   public Tuple nonDistinctNext() {
-    /* Method takes tuples tuple2 from o2, merges them with tuple1 from o1 
-         * and evaluates them, if it finds a fitting Tuple, returns tuple1
-     */
     tuple1 = o1.nonDistinctNext();
     while (tuple1 != null) {
       o2.reset();
@@ -57,16 +55,14 @@ public class AntiJoin implements Operator {
     return null;
   }
 
-  /* Method next() returns the next tuple in AntiJoin of o1 and o2 by 
-     * conditions set in TupleTransformation.
-     * Returns the result of o1.next() if transformation is not null
-     * Does not return the result of transform()!
+  /** 
+   * Returns the next tuple in AntiJoin of o1 and o2 by 
+   * conditions set in TupleTransformation.
+   * Returns the result of o1.next() if transformation is not null
+   * Does not return the result of transform()!
    */
   @Override
   public Tuple next() {
-    /* Method takes tuples tuple2 from o2, merges them with tuple1 from o1 
-         * and evaluates them, if it finds a fitting Tuple, returns tuple1
-     */
     tuple1 = o1.next();
     while (tuple1 != null) {
       o2.reset();

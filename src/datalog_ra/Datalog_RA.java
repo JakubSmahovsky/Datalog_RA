@@ -12,17 +12,17 @@ import java.util.Scanner;
 public class Datalog_RA {
   public static void main(String[] args) throws Exception {
 
-    Scanner cin = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
     Instance EDB = new Instance();
     while (true) {
-      if (cin.hasNext()) {
-        String input = cin.nextLine();
+      if (scanner.hasNext()) {
+        String input = scanner.nextLine();
         String command[] = input.split(" +");
         if (command.length < 1) {
           System.out.println("?");
         } else {
           switch (command[0]) {
-            // load command, loads the contents of directory in command[1]
+            // load the contents of directory in command[1]
             case "load":
               if (command[1] == null) {
                 System.out.println("File path is required!");
@@ -37,7 +37,6 @@ public class Datalog_RA {
               }
               System.out.println("Load done!");
               break;
-            // save command, saves the current EDB to directory in command[1]    
             case "test":
               if (command[1] == null) {
                 System.out.println("Test name is required!");
@@ -58,7 +57,6 @@ public class Datalog_RA {
                 System.out.println("Invalid file: " + command[1]);
                 break;
               }
-              System.out.println("Load done!");
               long startTime = System.nanoTime();
               prog.run(EDB);
               System.out.println("query time: " 

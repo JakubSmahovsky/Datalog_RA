@@ -1,4 +1,4 @@
-rel:=
+result:=
 	join[^2 != ^4] (
 		selection[^2 = 0](
 			i100000r10|2
@@ -7,4 +7,4 @@ rel:=
 			i100000r100|2
 		)
 	).
-?rel|4.
+?result|4.

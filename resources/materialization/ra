@@ -1,0 +1,8 @@
+tmp1:= selection[^2 = 0](i100000r10|2).
+tmp2:= selection[^2 = 0](i100000r100|2).
+result:=
+  join[^2 != ^4] (
+    tmp1|2,
+    tmp2|2
+  ).
+?result|4.
